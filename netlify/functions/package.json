@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "@netlify/blobs": "^8.0.0"
+    "@netlify/blobs": "^8.0.0",
+    "@neondatabase/serverless": "^0.10.4"
   }
 }

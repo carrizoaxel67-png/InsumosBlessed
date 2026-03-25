@@ -1,179 +1,371 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario Admin | BLESSED BARBERSHOP</title>
+    <title>Admin | Blessed Insumos</title>
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#0c0c0c">
+    <meta name="theme-color" content="#050505">
     <link rel="icon" type="image/png" href="assets/img/favicon.png">
-    <link rel="apple-touch-icon" href="assets/img/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/styles.css">
-
-    <!-- Netlify Identity Widget (para logout y getAuthToken) -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Netlify Identity -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script src="assets/js/auth.js"></script>
-
     <style>
-        /* ── Inputs inline (tabla desktop) ── */
-        .edit-input {
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #050505;
+            color: #e5e7eb;
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse at 80% 10%, rgba(212,175,55,0.05) 0%, transparent 60%),
+                        radial-gradient(ellipse at 10% 80%, rgba(212,175,55,0.03) 0%, transparent 50%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── SIDEBAR ── */
+        #sidebar {
+            width: 220px;
+            min-height: 100vh;
+            background: #0c0c0c;
+            border-right: 1px solid rgba(212,175,55,0.1);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+        #sidebar .logo-area {
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 13px 20px;
+            color: #71717a;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            border-radius: 0;
+            transition: all 0.2s;
+            border-left: 2px solid transparent;
+            user-select: none;
+        }
+        .nav-item:hover { color: #fff; background: rgba(255,255,255,0.03); }
+        .nav-item.active {
+            color: #d4af37;
+            background: rgba(212,175,55,0.07);
+            border-left-color: #d4af37;
+        }
+        .nav-item svg { flex-shrink: 0; }
+
+        /* ── MAIN ── */
+        #main {
+            margin-left: 220px;
+            flex: 1;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── STATS CARDS ── */
+        .stat-card {
+            background: rgba(18,18,18,0.8);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 18px 20px;
+            backdrop-filter: blur(12px);
+            transition: border-color 0.2s;
+        }
+        .stat-card:hover { border-color: rgba(212,175,55,0.25); }
+
+        /* ── PRODUCT ROWS ── */
+        .product-row {
+            background: rgba(15,15,15,0.6);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            transition: all 0.2s;
+        }
+        .product-row:hover { border-color: rgba(212,175,55,0.2); background: rgba(212,175,55,0.03); }
+        .product-row.hidden-product { opacity: 0.35; }
+
+        /* ── INPUTS ── */
+        .admin-input {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 10px;
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 0.875rem;
+            font-family: 'Outfit', monospace;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        .admin-input:focus { outline: none; border-color: #d4af37; }
+        .admin-input::placeholder { color: #52525b; }
+
+        .inline-input {
             background: transparent;
             border: 1px solid transparent;
-            border-radius: 6px;
-            padding: 2px 6px;
-            color: white;
+            border-radius: 8px;
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 0.8rem;
             font-family: monospace;
-            font-size: 0.75rem;
+            transition: all 0.15s;
             text-align: right;
             width: 90px;
-            transition: all 0.15s;
         }
-        .edit-input:focus { outline: none; border-color: #c5a059; background: rgba(197,160,89,0.08); }
-        .edit-input:hover { border-color: #3f3f46; }
+        .inline-input:focus { outline: none; border-color: #d4af37; background: rgba(212,175,55,0.06); }
+        .inline-input:hover { border-color: #333; }
 
         .stock-input {
-            background: #18181b;
+            background: #111;
             border: 1px solid transparent;
-            border-radius: 6px;
-            padding: 2px 6px;
-            color: white;
+            border-radius: 8px;
+            color: #fff;
+            padding: 4px 6px;
             font-family: monospace;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 800;
             text-align: center;
-            width: 60px;
+            width: 56px;
             transition: all 0.15s;
         }
-        .stock-input:focus { outline: none; border-color: #c5a059; }
-        .stock-input:hover { border-color: #3f3f46; }
+        .stock-input:focus { outline: none; border-color: #d4af37; }
 
-        /* ── Toggle switch ── */
-        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        /* ── TOGGLE ── */
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider {
-            position: absolute; cursor: pointer; inset: 0;
-            background-color: #3f3f46; border-radius: 22px; transition: 0.2s;
+        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #333; border-radius: 22px; transition: 0.25s; }
+        .toggle-slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+        input:checked + .toggle-slider { background: #d4af37; }
+        input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+        .toggle-switch-lg { width: 50px; height: 28px; }
+        .toggle-switch-lg .toggle-slider::before { width: 20px; height: 20px; left: 4px; bottom: 4px; }
+        .toggle-switch-lg input:checked + .toggle-slider::before { transform: translateX(22px); }
+
+        /* ── GOLD BUTTON ── */
+        .btn-gold {
+            background: linear-gradient(135deg, #d4af37, #b58d19);
+            color: #000;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s;
         }
-        .toggle-slider:before {
-            content: ""; position: absolute;
-            height: 16px; width: 16px; left: 3px; bottom: 3px;
-            background: white; border-radius: 50%; transition: 0.2s;
+        .btn-gold::after {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            animation: shimmer 2.5s ease infinite;
         }
-        .toggle-switch input:checked + .toggle-slider { background-color: #22c55e; }
-        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+        @keyframes shimmer { 0% { left: -100%; } 60% { left: 130%; } 100% { left: 130%; } }
+        .btn-gold:hover { box-shadow: 0 6px 24px rgba(212,175,55,0.35); transform: translateY(-1px); }
 
-        /* Toggle más grande en móvil */
-        .toggle-switch-lg { position: relative; display: inline-block; width: 52px; height: 28px; }
-        .toggle-switch-lg input { opacity: 0; width: 0; height: 0; }
-        .toggle-switch-lg .toggle-slider { border-radius: 28px; }
-        .toggle-switch-lg .toggle-slider:before { height: 20px; width: 20px; left: 4px; bottom: 4px; }
-        .toggle-switch-lg input:checked + .toggle-slider:before { transform: translateX(24px); }
+        /* ── TOAST ── */
+        #saveToast { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 200; transition: all 0.3s ease; }
 
-        /* ── Filas ocultas ── */
-        tr.hidden-product td { opacity: 0.35; }
-        .mobile-card.hidden-product { opacity: 0.45; }
-
-        /* ── Toast ── */
-        #saveToast { transition: all 0.3s ease; }
-
-        /* ── Spin ── */
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-up { animation: fadeUp 0.35s ease forwards; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { animation: spin 0.8s linear infinite; display: inline-block; }
 
-        /* ── Mobile card inputs ── */
-        .mobile-edit-input {
-            background: #18181b;
-            border: 1px solid #3f3f46;
-            border-radius: 8px;
-            padding: 8px 10px;
-            color: white;
-            font-family: monospace;
-            font-size: 0.875rem;
-            width: 100%;
-            transition: border-color 0.15s;
-            -webkit-appearance: none;
-        }
-        .mobile-edit-input:focus { outline: none; border-color: #c5a059; }
+        /* ── MODAL ── */
+        .modal-overlay { transition: opacity 0.2s ease; }
+        .modal-box { transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s; }
 
-        /* ── Modal full-screen en móvil ── */
-        @media (max-width: 640px) {
-            #editModal > div {
-                max-width: 100%;
-                width: 100%;
-                border-radius: 24px 24px 0 0;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                max-height: 92vh;
-                overflow-y: auto;
-            }
-            #editModal {
-                align-items: flex-end;
-            }
+        /* ── CATEGORY CHIP ── */
+        .cat-chip {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 8px;
+            background: rgba(15,15,15,0.8);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
         }
+        .cat-chip:hover { border-color: rgba(212,175,55,0.3); }
+
+        /* ── REVIEW CARD ── */
+        .review-card {
+            background: rgba(15,15,15,0.8);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 18px;
+            transition: all 0.2s;
+        }
+        .review-card:hover { border-color: rgba(212,175,55,0.2); }
+
+        /* ── MOBILE SIDEBAR ── */
+        @media (max-width: 768px) {
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,0.8); }
+            #main { margin-left: 0; }
+            #mobileTopBar { display: flex; }
+        }
+        @media (min-width: 769px) {
+            #mobileTopBar { display: none; }
+        }
+
+        /* ── STATUS BADGE ── */
+        .status-badge { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; border: 1px solid; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
     </style>
 </head>
+<body>
 
-<body class="p-3 md:p-8">
+<!-- Toast -->
+<div id="saveToast" class="hidden">
+    <div id="toastContent" class="flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl text-sm font-bold backdrop-blur-xl"></div>
+</div>
 
-    <!-- Toast de notificación -->
-    <div id="saveToast" class="fixed top-4 left-4 right-4 md:left-auto md:right-6 md:top-6 md:w-auto z-[100] hidden">
-        <div id="toastContent" class="flex items-center gap-3 px-5 py-4 rounded-xl border shadow-2xl backdrop-blur text-sm font-semibold text-center justify-center"></div>
+<!-- MOBILE TOP BAR -->
+<div id="mobileTopBar" class="fixed top-0 left-0 right-0 z-40 bg-[#0c0c0c] border-b border-white/5 px-4 py-3 items-center justify-between">
+    <button onclick="toggleSidebar()" class="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="font-black text-white uppercase tracking-widest text-sm">Blessed <span class="text-[#d4af37]">Admin</span></span>
+    <button onclick="saveChanges()" class="btn-gold px-4 py-2 rounded-xl text-xs tracking-widest uppercase">Guardar</button>
+</div>
+<!-- Mobile overlay -->
+<div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav id="sidebar">
+    <!-- Logo -->
+    <div class="logo-area">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full border-2 border-[#d4af37] bg-black flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+                <span class="text-[#d4af37] font-black text-lg italic">B</span>
+            </div>
+            <div>
+                <p class="text-white font-black text-base uppercase tracking-wide leading-none">Blessed</p>
+                <p class="text-[#d4af37] text-[10px] font-bold uppercase tracking-[0.2em] mt-0.5">Insumos · Admin</p>
+            </div>
+        </div>
     </div>
 
-    <div class="max-w-7xl mx-auto">
+    <!-- Navigation -->
+    <div class="flex-1 py-4 overflow-y-auto">
+        <p class="text-zinc-700 text-[9px] font-bold uppercase tracking-[0.3em] px-5 mb-2 mt-2">Gestión</p>
 
-        <!-- ── HEADER ── -->
-        <div class="flex items-center justify-between mb-5 md:mb-8 border-b border-zinc-800 pb-4 md:pb-6">
+        <div class="nav-item active" id="navCatalogo" onclick="switchSection('catalogo')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V11"/></svg>
+            Catálogo
+        </div>
+        <div class="nav-item" id="navCategorias" onclick="switchSection('categorias')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+            Categorías
+        </div>
+        <div class="nav-item" id="navCalculadora" onclick="switchSection('calculadora')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            Calculadora
+        </div>
+        <div class="nav-item" id="navReviews" onclick="switchSection('reviews')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+            Testimonios
+        </div>
+
+        <p class="text-zinc-700 text-[9px] font-bold uppercase tracking-[0.3em] px-5 mb-2 mt-6">Divisas</p>
+        <div class="nav-item" id="navDivisas" onclick="switchSection('divisas')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Conversor
+        </div>
+    </div>
+
+    <!-- User info -->
+    <div class="border-t border-white/5 p-4">
+        <p class="text-zinc-600 text-[10px] uppercase tracking-widest font-bold mb-1">Conectado como:</p>
+        <p id="userEmail" class="text-zinc-400 text-xs font-semibold truncate mb-3">—</p>
+        <div class="flex gap-2">
+            <a href="index.html" class="flex-1 text-center text-[11px] font-bold bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-zinc-300 py-2 rounded-xl transition-colors">Ver Sitio</a>
+            <button onclick="logout()" class="flex-1 text-[11px] font-bold bg-red-900/30 border border-red-800/50 hover:bg-red-900/50 text-red-400 py-2 rounded-xl transition-colors">Salir</button>
+        </div>
+    </div>
+</nav>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main id="main" class="pt-4 md:pt-0">
+
+    <!-- Unsaved banner -->
+    <div id="unsavedBanner" class="hidden mx-6 mt-4 flex items-center justify-between gap-3 bg-amber-950/40 border border-amber-800/40 rounded-xl px-4 py-3">
+        <span class="text-amber-400 text-xs font-bold uppercase tracking-widest">⚠ Cambios sin guardar</span>
+        <button onclick="saveChanges()" class="text-xs bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-1.5 rounded-lg tracking-widest uppercase transition-all">Guardar</button>
+    </div>
+
+    <!-- ══ SECCIÓN: CATÁLOGO ══ -->
+    <section id="sectionCatalogo" class="p-6 md:p-8 fade-up">
+        <div class="flex items-center justify-between mb-6 mt-10 md:mt-0">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Inventario</h1>
+                <p class="text-zinc-500 text-sm mt-1">Gestioná los productos del catálogo.</p>
+            </div>
             <div class="flex items-center gap-3">
-                <div class="h-12 w-12 md:h-16 md:w-16 gold-border border-2 flex items-center justify-center rounded-full bg-black shrink-0">
-                    <span class="gold-text font-black text-xl md:text-2xl italic">B</span>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <h1 class="text-xl md:text-3xl font-bold tracking-tighter uppercase gold-text">Blessed</h1>
-                        <span class="bg-red-500/10 text-red-500 border border-red-500/50 text-[9px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">Admin</span>
-                    </div>
-                    <p class="text-zinc-500 text-[10px] mt-0.5 tracking-widest font-semibold uppercase hidden md:block">Control de Stock Interno</p>
-                </div>
-            </div>
-            <div class="flex flex-col items-end gap-2">
-                <!-- Guardar — visible en todas las pantallas -->
-                <button id="btnSave" onclick="saveChanges()"
-                    class="flex items-center gap-1.5 bg-[#c5a059] hover:bg-[#d4b06a] text-black font-black py-2.5 px-4 md:px-5 rounded-xl uppercase text-[10px] md:text-[11px] tracking-widest transition-all">
+                <button id="btnSave" onclick="saveChanges()" class="btn-gold hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    <span>Guardar</span>
+                    Guardar
                 </button>
-                <button onclick="logout()"
-                    class="text-[9px] uppercase tracking-widest text-zinc-600 hover:text-white transition-colors underline underline-offset-4">Salir</button>
+                <button onclick="addNewItem()" class="hidden md:flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white py-2.5 px-5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    Nuevo Producto
+                </button>
             </div>
         </div>
 
-        <!-- ── CATEGORY TOGGLE ── -->
-        <div class="flex gap-2 mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-1">
-            <button id="catPerfumes" onclick="setCategory('perfumes')"
-                class="flex-1 py-3 md:py-2 rounded-lg bg-[#c5a059] text-black font-bold text-sm transition-all shadow-sm">Perfumes</button>
-            <button id="catVapes" onclick="setCategory('vapes')"
-                class="flex-1 py-3 md:py-2 rounded-lg text-zinc-500 hover:text-white font-bold text-sm transition-all">Vaporizadores</button>
-            <button id="catBarber" onclick="setCategory('barber')"
-                class="flex-1 py-3 md:py-2 rounded-lg text-zinc-500 hover:text-white font-bold text-sm transition-all">Insumos</button>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div class="stat-card">
+                <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold mb-1">Total Items</p>
+                <p class="text-white font-black text-2xl font-mono" id="statTotal">0</p>
+            </div>
+            <div class="stat-card border-[#d4af37]/20">
+                <p class="text-[#d4af37] text-[10px] uppercase tracking-widest font-bold mb-1">Disponibles</p>
+                <p class="text-[#d4af37] font-black text-2xl font-mono" id="statAvailable">0</p>
+            </div>
+            <div class="stat-card border-orange-500/20">
+                <p class="text-orange-400 text-[10px] uppercase tracking-widest font-bold mb-1">Poco Stock</p>
+                <p class="text-orange-400 font-black text-2xl font-mono" id="statLow">0</p>
+            </div>
+            <div class="stat-card border-red-500/20">
+                <p class="text-red-400 text-[10px] uppercase tracking-widest font-bold mb-1">Agotados</p>
+                <p class="text-red-400 font-black text-2xl font-mono" id="statOut">0</p>
+            </div>
         </div>
 
-        <!-- ── FILTROS (solo perfumes) ── -->
+        <!-- Category Tabs -->
+        <div class="flex gap-1 p-1 bg-zinc-900 border border-zinc-800 rounded-xl mb-4">
+            <button id="catPerfumes" onclick="setCategory('perfumes')" class="flex-1 py-2 rounded-lg bg-[#d4af37] text-black font-bold text-sm transition-all shadow-sm">Perfumes</button>
+            <button id="catVapes" onclick="setCategory('vapes')" class="flex-1 py-2 rounded-lg text-zinc-500 hover:text-white font-bold text-sm transition-all">Vapes</button>
+            <button id="catBarber" onclick="setCategory('barber')" class="flex-1 py-2 rounded-lg text-zinc-500 hover:text-white font-bold text-sm transition-all">Insumos</button>
+        </div>
+
+        <!-- Filters -->
         <div id="perfumeFilters" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            <div class="md:col-span-1 relative">
-                <input type="text" id="searchInput" placeholder="Buscar perfume o SKU..."
-                    class="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3.5 px-4 pl-10 focus:outline-none focus:ring-1 focus:ring-[#c5a059] text-white text-sm transition-colors">
-                <svg class="absolute left-3 top-3.5 h-4 w-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
+            <div class="relative md:col-span-1">
+                <input type="text" id="searchInput" placeholder="Buscar producto o SKU..." class="admin-input pl-10">
+                <svg class="absolute left-3 top-3 h-4 w-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
-            <select id="brandFilter"
-                class="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3.5 px-4 focus:outline-none focus:ring-1 focus:ring-[#c5a059] text-zinc-400 transition-colors text-sm">
+            <select id="brandFilter" class="admin-input appearance-none">
                 <option value="all">Todas las Marcas</option>
                 <option value="AFNAN">Afnan</option>
                 <option value="LATTAFA">Lattafa</option>
@@ -182,8 +374,7 @@
                 <option value="AL_HARAMAIN">Al Haramain</option>
                 <option value="OTROS">Otros / Dupes</option>
             </select>
-            <select id="genderFilter"
-                class="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3.5 px-4 focus:outline-none focus:ring-1 focus:ring-[#c5a059] text-zinc-400 transition-colors text-sm">
+            <select id="genderFilter" class="admin-input appearance-none">
                 <option value="all">Género: Todos</option>
                 <option value="H">Hombre (H)</option>
                 <option value="M">Mujer (M)</option>
@@ -191,149 +382,436 @@
             </select>
         </div>
 
-        <!-- ── TOOLBAR (contador + toggle vista — solo desktop) ── -->
-        <div class="flex items-center justify-between mb-4">
-            <span class="text-zinc-500 text-xs font-semibold tracking-widest uppercase"><span id="totalItems">0</span> items</span>
-            <div class="flex items-center gap-2">
-                <!-- Botón añadir universal -->
-                <button id="btnAddItem" onclick="addNewItem()" class="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all border border-zinc-700">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    Añadir
-                </button>
-                <!-- View toggle — solo en md+ -->
-                <div class="hidden md:flex bg-zinc-900 border border-zinc-800 rounded-xl p-1 shrink-0">
-                    <button id="btnTableView"
-                        class="px-5 py-2 rounded-lg bg-zinc-800 text-white font-semibold text-sm transition-all shadow-sm flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                        Tabla
-                    </button>
-                    <button id="btnGalleryView"
-                        class="px-5 py-2 rounded-lg text-zinc-500 hover:text-white font-semibold text-sm transition-all flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                        Galería
-                    </button>
-                </div>
-            </div>
-        </div>
+        <!-- Mobile: FAB -->
+        <button onclick="addNewItem()" class="md:hidden fixed bottom-6 right-6 z-30 btn-gold w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl shadow-[#d4af37]/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        </button>
 
-        <!-- ── Banner cambios sin guardar ── -->
-        <div id="unsavedBanner" class="hidden mb-4 flex items-center justify-between gap-3 bg-amber-950/50 border border-amber-800/50 rounded-xl px-4 py-3">
-            <span class="text-amber-400 text-xs font-bold uppercase tracking-widest">⚠ Cambios sin guardar</span>
-            <button onclick="saveChanges()" class="text-xs bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-1.5 rounded-lg tracking-widest uppercase transition-all whitespace-nowrap">Guardar</button>
-        </div>
-
-        <!-- ── VISTA MÓVIL: Cards (se muestra en pantallas < md) ── -->
+        <!-- Mobile cards -->
         <div id="mobileCardList" class="md:hidden space-y-3"></div>
 
-        <!-- ── VISTA DESKTOP: Tabla (controlada por JS con style, no clases Tailwind) ── -->
-        <div id="tableView" style="display:none" class="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden animate-fade-in">
+        <!-- Desktop table -->
+        <div id="tableView" class="hidden md:block bg-[#0c0c0c] rounded-2xl border border-zinc-800/80 overflow-hidden shadow-xl">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr id="theadRow" class="bg-black text-[10px] uppercase tracking-[0.2em] text-zinc-500 border-b border-zinc-800"></tr>
+                        <tr id="theadRow" class="bg-[#050505] text-[10px] uppercase tracking-[0.2em] text-zinc-600 border-b border-zinc-800"></tr>
                     </thead>
                     <tbody id="inventoryTable"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ── VISTA GALERÍA (desktop) ── -->
-        <div id="galleryView" style="display:none" class="animate-fade-in">
-            <div id="inventoryGallery" class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4"></div>
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-zinc-700">
+            <svg class="w-14 h-14 mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V11"/></svg>
+            <p class="text-lg font-bold tracking-widest uppercase mb-1">Inventario Vacío</p>
+            <p class="text-sm text-zinc-600">Agregá tu primer producto para empezar a vender.</p>
         </div>
-    </div>
+    </section>
 
-    <!-- ── MODAL EDITAR ── -->
-    <div id="editModal" class="fixed inset-0 bg-black/90 hidden items-end md:items-center justify-center p-0 md:p-4 z-50 backdrop-blur-sm">
-        <div class="bg-zinc-900 border border-zinc-800 w-full md:max-w-lg overflow-hidden shadow-2xl rounded-t-[28px] md:rounded-[28px]">
-            <!-- Handle para móvil -->
-            <div class="flex justify-center pt-4 pb-2 md:hidden">
-                <div class="w-10 h-1 bg-zinc-700 rounded-full"></div>
+    <!-- ══ SECCIÓN: CATEGORÍAS ══ -->
+    <section id="sectionCategorias" class="hidden p-6 md:p-8 fade-up">
+        <div class="mb-8 mt-10 md:mt-0">
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Categorías</h1>
+            <p class="text-zinc-500 text-sm mt-1">Agregá o eliminá colecciones del catálogo.</p>
+        </div>
+        <div class="max-w-lg">
+            <div class="flex gap-3 mb-6">
+                <input type="text" id="newCategoryInput" placeholder="Ej: Ropa Interior Premium" class="admin-input" onkeydown="if(event.key==='Enter') addCategory()">
+                <button onclick="addCategory()" class="btn-gold px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest whitespace-nowrap">Agregar</button>
             </div>
-            <div class="p-6 md:p-8">
-                <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-lg font-bold text-white tracking-tight">Editar Producto</h3>
-                    <span id="editModalSKU" class="font-mono text-[10px] text-zinc-600 bg-zinc-800 px-2 py-1 rounded"></span>
-                </div>
-                <div class="space-y-4">
-                    <!-- Fija la imagen arriba y la info debajo -->
-                    <div class="flex gap-4 items-start mb-6">
-                        <!-- Preview Imagen -->
-                        <div class="w-24 h-24 shrink-0 bg-black border border-zinc-800 rounded-xl overflow-hidden relative group cursor-pointer" onclick="document.getElementById('editImgFile').click()">
-                            <img id="editImgPreview" src="" class="w-full h-full object-contain" alt="Preview" onerror="this.src='https://via.placeholder.com/300x300/000000/ffffff?text=X'">
-                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span class="text-[9px] font-bold text-white uppercase tracking-widest text-center px-1">Cambiar<br>Foto</span>
-                            </div>
-                        </div>
-                        <input type="file" id="editImgFile" class="hidden" accept="image/png, image/jpeg, image/webp" onchange="handleImageUpload(event)">
-                        
-                        <!-- Nombre -->
-                        <div class="flex-1">
-                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Nombre del Producto</label>
-                            <input id="editName" type="text" class="w-full bg-black border border-zinc-800 rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:border-[#c5a059] transition-colors">
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Costo ($)</label>
-                            <input id="editCost" type="number" inputmode="numeric" class="w-full bg-black border border-zinc-800 rounded-xl py-3.5 px-4 text-white font-mono text-sm focus:outline-none focus:border-[#c5a059] transition-colors">
-                        </div>
-                        <div>
-                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Precio Público ($)</label>
-                            <input id="editPrice" type="number" inputmode="numeric" class="w-full bg-black border border-zinc-800 rounded-xl py-3.5 px-4 text-white font-mono text-sm focus:outline-none focus:border-[#c5a059] transition-colors">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 items-center">
-                        <div>
-                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Stock</label>
-                            <input id="editStock" type="number" min="0" inputmode="numeric" placeholder="Sin límite" class="w-full bg-black border border-zinc-800 rounded-xl py-3.5 px-4 text-white font-mono text-sm focus:outline-none focus:border-[#c5a059] transition-colors">
-                        </div>
-                        <div>
-                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Visible al público</label>
-                            <label class="toggle-switch toggle-switch-lg mt-1">
-                                <input type="checkbox" id="editVisible">
-                                <span class="toggle-slider"></span>
-                            </label>
+            <div id="categoryList" class="space-y-3">
+                <p class="text-zinc-600 text-sm text-center py-8">No hay categorías personalizadas aún.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ SECCIÓN: CALCULADORA ══ -->
+    <section id="sectionCalculadora" class="hidden p-6 md:p-8 fade-up">
+        <div class="mb-8 mt-10 md:mt-0">
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Calculadora</h1>
+            <p class="text-zinc-500 text-sm mt-1">Herramienta rápida de márgenes.</p>
+        </div>
+
+        <div class="max-w-md">
+            <div class="bg-[#0c0c0c] border border-zinc-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+                <div class="absolute -top-16 -right-16 w-32 h-32 bg-[#d4af37] rounded-full mix-blend-screen filter blur-[60px] opacity-10 pointer-events-none"></div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-2 font-bold">Costo de Producción</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-zinc-500 font-bold text-sm">$</span>
+                            <input type="number" id="calcCost" value="0" class="admin-input pl-7 text-lg font-mono" oninput="calculateMargin()">
                         </div>
                     </div>
                     <div>
-                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Estado / Etiqueta</label>
-                        <select id="editStatus" class="w-full bg-black border border-zinc-800 rounded-xl py-3.5 px-4 text-white text-sm focus:outline-none focus:border-[#c5a059] transition-colors appearance-none">
-                            <option value="house">🏠 PRODUCTO DE LA CASA</option>
-                            <option value="available">DISPONIBLE (verde)</option>
-                            <option value="unavailable">NO DISPONIBLE (rojo oscuro/gris)</option>
-                            <option value="preorder">DISPONIBLE POR ENCARGUE (celeste)</option>
-                            <option value="out_of_stock">SIN STOCK (rojo)</option>
-                            <option value="low_stock">POCAS UNIDADES (naranja)</option>
-                        </select>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-2 font-bold">Margen (%)</label>
+                        <div class="relative">
+                            <input type="number" id="calcMargin" value="50" class="admin-input text-lg font-mono text-[#d4af37] font-black pr-8" oninput="calculateMargin()">
+                            <span class="absolute right-3 top-3 text-zinc-500 font-bold text-sm">%</span>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="flex flex-col md:flex-row gap-3 mt-8 pb-safe items-center">
-                    <button onclick="saveEditModal()"
-                        class="w-full md:w-auto flex-1 gold-bg text-black font-black py-4 rounded-xl uppercase text-xs tracking-widest hover:opacity-90 transition-opacity order-1 md:order-2">
-                        Guardar
-                    </button>
-                    <button onclick="closeEditModal()"
-                        class="w-full md:w-auto px-6 py-4 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors order-2 md:order-3">
-                        Cancelar
-                    </button>
-                    <button onclick="deleteCurrentItem()"
-                        class="w-full md:w-auto px-6 py-4 text-red-500 hover:text-red-400 hover:bg-red-900/20 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors order-3 md:order-1 flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        Borrar Producto
-                    </button>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-[#080808] border border-zinc-800 rounded-xl p-4">
+                        <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold mb-2">Precio Venta</p>
+                        <p class="text-white font-black text-2xl font-mono">$<span id="calcResult">0</span></p>
+                    </div>
+                    <div class="bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-xl p-4">
+                        <p class="text-[#d4af37] text-[10px] uppercase tracking-widest font-bold mb-2">Ganancia Un.</p>
+                        <p class="text-[#d4af37] font-black text-2xl font-mono">+$<span id="calcProfit">0</span></p>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
+
+    <!-- ══ SECCIÓN: TESTIMONIOS / RESEÑAS ══ -->
+    <section id="sectionReviews" class="hidden p-6 md:p-8 fade-up">
+        <div class="flex items-center justify-between mb-8 mt-10 md:mt-0">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Testimonios</h1>
+                <p class="text-zinc-500 text-sm mt-1">Administrá las reseñas visibles al público.</p>
+            </div>
+            <button onclick="openReviewModal()" class="btn-gold flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                Nueva Reseña
+            </button>
+        </div>
+        <div id="reviewList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <p class="text-zinc-600 text-sm col-span-full text-center py-12">No hay testimonios aún.</p>
+        </div>
+    </section>
+
+    <!-- ══ SECCIÓN: CONVERSOR DE DIVISAS ══ -->
+    <section id="sectionDivisas" class="hidden p-6 md:p-8 fade-up">
+        <div class="flex items-center justify-between mb-8 mt-10 md:mt-0">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Conversor</h1>
+                <p class="text-zinc-500 text-sm mt-1">Divisas en tiempo real.</p>
+            </div>
+            <button onclick="fetchLiveExchangeRates()" class="flex items-center gap-2 bg-zinc-800 border border-zinc-700 hover:border-[#d4af37]/50 text-zinc-300 hover:text-[#d4af37] py-2.5 px-5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Actualizar online
+            </button>
+        </div>
+
+        <div class="max-w-md space-y-6">
+            <div class="bg-[#0c0c0c] border border-zinc-800 rounded-2xl p-6 shadow-xl">
+                <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold mb-4">Tasas de Cotización (editables)</p>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <span class="w-12 text-center text-xs font-black bg-black border border-zinc-800 py-2.5 rounded-xl text-zinc-300">USD</span>
+                        <span class="text-zinc-600">=</span>
+                        <input type="number" id="rateUSD" value="40.5" class="admin-input text-right font-mono" oninput="convertCurrency()">
+                        <span class="text-xs font-bold text-zinc-500 w-10">UYU</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="w-12 text-center text-xs font-black bg-black border border-zinc-800 py-2.5 rounded-xl text-zinc-300">EUR</span>
+                        <span class="text-zinc-600">=</span>
+                        <input type="number" id="rateEUR" value="44.2" class="admin-input text-right font-mono" oninput="convertCurrency()">
+                        <span class="text-xs font-bold text-zinc-500 w-10">UYU</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="w-12 text-center text-xs font-black bg-black border border-zinc-800 py-2.5 rounded-xl text-zinc-300">BRL</span>
+                        <span class="text-zinc-600">=</span>
+                        <input type="number" id="rateBRL" value="7.2" class="admin-input text-right font-mono" oninput="convertCurrency()">
+                        <span class="text-xs font-bold text-zinc-500 w-10">UYU</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#0c0c0c] border border-zinc-800 rounded-2xl p-6 shadow-xl">
+                <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold mb-4">Calculadora Rápida</p>
+                <div class="flex items-center gap-3">
+                    <input type="number" id="amountToConvert" value="100" class="admin-input w-28 text-center font-mono text-lg" oninput="convertCurrency()">
+                    <select id="currencyFrom" class="admin-input w-24 appearance-none font-bold uppercase" onchange="convertCurrency()">
+                        <option value="USD">USD 🇺🇸</option>
+                        <option value="EUR">EUR 🇪🇺</option>
+                        <option value="BRL">BRL 🇧🇷</option>
+                    </select>
+                    <span class="text-zinc-600 font-bold text-xl">→</span>
+                    <div class="flex-1 bg-[#d4af37]/5 border border-[#d4af37]/25 rounded-xl py-3 px-4 text-right">
+                        <span class="text-zinc-400 text-xs font-bold">$ </span>
+                        <span id="convertedResult" class="text-white font-black font-mono text-xl">4050</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ══ MODAL: EDITAR PRODUCTO ══ -->
+<div id="editModal" class="fixed inset-0 bg-black/85 hidden items-end md:items-center justify-center p-0 md:p-4 z-[80] backdrop-blur-md modal-overlay">
+    <div class="bg-[#0e0e0e] border border-zinc-800 w-full md:max-w-lg overflow-hidden rounded-t-[28px] md:rounded-[28px] shadow-2xl modal-box">
+        <div class="flex justify-center pt-4 pb-2 md:hidden"><div class="w-10 h-1 bg-zinc-700 rounded-full"></div></div>
+        <div class="p-6 md:p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-black text-white tracking-tight">Editar Producto</h3>
+                <span id="editModalSKU" class="font-mono text-[10px] text-zinc-600 bg-zinc-900 px-3 py-1 rounded-lg"></span>
+            </div>
+            <div class="space-y-4">
+                <div class="flex gap-4 items-start mb-2">
+                    <div class="w-24 h-24 shrink-0 bg-black border border-zinc-800 rounded-xl overflow-hidden relative group cursor-pointer" onclick="document.getElementById('editImgFile').click()">
+                        <img id="editImgPreview" src="" class="w-full h-full object-contain" alt="Preview" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2218%22 font-size=%2218%22>📦</text></svg>'">
+                        <div class="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="text-[9px] font-bold text-white uppercase tracking-widest text-center">Cambiar<br>Foto</span>
+                        </div>
+                    </div>
+                    <input type="file" id="editImgFile" class="hidden" accept="image/png, image/jpeg, image/webp" onchange="handleImageUpload(event)">
+                    <div class="flex-1">
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Nombre del Producto</label>
+                        <input id="editName" type="text" class="admin-input">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Costo ($)</label>
+                        <input id="editCost" type="number" class="admin-input font-mono">
+                    </div>
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Precio Público ($)</label>
+                        <input id="editPrice" type="number" class="admin-input font-mono">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 items-center">
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Stock</label>
+                        <input id="editStock" type="number" min="0" placeholder="Sin límite" class="admin-input font-mono">
+                    </div>
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Visible al público</label>
+                        <label class="toggle-switch toggle-switch-lg mt-1">
+                            <input type="checkbox" id="editVisible">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Estado / Etiqueta</label>
+                    <select id="editStatus" class="admin-input appearance-none">
+                        <option value="available">✅ DISPONIBLE</option>
+                        <option value="house">🏠 PRODUCTO DE LA CASA</option>
+                        <option value="low_stock">⚡ POCAS UNIDADES</option>
+                        <option value="out_of_stock">❌ SIN STOCK</option>
+                        <option value="preorder">📦 DISPONIBLE POR ENCARGUE</option>
+                        <option value="unavailable">🚫 NO DISPONIBLE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row gap-3 mt-8 pb-safe">
+                <button onclick="saveEditModal()" class="btn-gold flex-1 py-4 rounded-xl text-xs font-black uppercase tracking-widest">Guardar</button>
+                <button onclick="closeEditModal()" class="flex-1 py-4 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">Cancelar</button>
+                <button onclick="deleteCurrentItem()" class="flex-1 py-4 text-red-500 hover:text-red-400 hover:bg-red-900/20 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Eliminar
+                </button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- Application Scripts -->
-    <script src="assets/js/inventory.js"></script>
-    <script src="assets/js/vapes_data.js"></script>
-    <script src="assets/js/barber_data.js"></script>
-    <script src="assets/js/admin.js"></script>
+<!-- ══ MODAL: NUEVA RESEÑA ══ -->
+<div id="reviewModal" class="fixed inset-0 bg-black/85 hidden items-center justify-center p-4 z-[80] backdrop-blur-md">
+    <div class="bg-[#0e0e0e] border border-zinc-800 w-full max-w-md rounded-[28px] shadow-2xl">
+        <div class="p-6 md:p-8">
+            <h3 class="text-lg font-black text-white mb-5">Nueva Reseña</h3>
+            <div class="space-y-4">
+                <input type="text" id="reviewName" placeholder="Nombre del cliente" class="admin-input">
+                <textarea id="reviewText" placeholder="Texto de la reseña..." rows="3" class="admin-input resize-none"></textarea>
+                <div class="flex items-center gap-3">
+                    <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">Estrellas:</label>
+                    <select id="reviewStars" class="admin-input appearance-none w-28">
+                        <option value="5">⭐⭐⭐⭐⭐</option>
+                        <option value="4">⭐⭐⭐⭐</option>
+                        <option value="3">⭐⭐⭐</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="saveReview()" class="btn-gold flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest">Guardar</button>
+                <button onclick="closeReviewModal()" class="flex-1 py-3 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="assets/js/inventory.js"></script>
+<script src="assets/js/vapes_data.js"></script>
+<script src="assets/js/barber_data.js"></script>
+<script src="assets/js/admin.js"></script>
+<script>
+// ── SIDEBAR / SECTIONS ──────────────────────────────────────────────────────
+function switchSection(name) {
+    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas'];
+    sections.forEach(s => {
+        const el = document.getElementById('section' + s);
+        if (el) el.classList.toggle('hidden', s.toLowerCase() !== name);
+    });
+    const navMap = { catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora', reviews:'navReviews', divisas:'navDivisas' };
+    Object.entries(navMap).forEach(([k,id]) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', k === name);
+    });
+    if (window.innerWidth < 769) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.add('hidden');
+    }
+    if (name === 'calculadora') { calculateMargin(); convertCurrency(); }
+}
+
+function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    sb.classList.toggle('open');
+    ov.classList.toggle('hidden');
+}
+
+// ── CATEGORIES ────────────────────────────────────────────────────────────────
+let customCategories = JSON.parse(localStorage.getItem('blessed_categories') || '[]');
+
+function renderCategories() {
+    const list = document.getElementById('categoryList');
+    if (!customCategories.length) {
+        list.innerHTML = '<p class="text-zinc-600 text-sm text-center py-8">No hay categorías personalizadas aún.</p>';
+        return;
+    }
+    list.innerHTML = customCategories.map((cat, i) => `
+        <div class="cat-chip">
+            <span class="text-white font-semibold">${cat}</span>
+            <button onclick="removeCategory(${i})" class="text-zinc-600 hover:text-red-400 transition-colors p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+function addCategory() {
+    const input = document.getElementById('newCategoryInput');
+    const val = input.value.trim();
+    if (!val) return;
+    customCategories.push(val);
+    localStorage.setItem('blessed_categories', JSON.stringify(customCategories));
+    input.value = '';
+    renderCategories();
+    showToast('✓ Categoría agregada', 'success');
+}
+
+function removeCategory(i) {
+    customCategories.splice(i, 1);
+    localStorage.setItem('blessed_categories', JSON.stringify(customCategories));
+    renderCategories();
+}
+
+// ── USER EMAIL ────────────────────────────────────────────────────────────────
+function setUserEmail() {
+    try {
+        const user = netlifyIdentity.currentUser();
+        if (user) document.getElementById('userEmail').textContent = user.email;
+    } catch(e) {}
+}
+netlifyIdentity.on('login', () => { setUserEmail(); });
+netlifyIdentity.on('init', () => { setUserEmail(); });
+window.addEventListener('DOMContentLoaded', () => {
+    setUserEmail();
+    renderCategories();
+});
+
+// ── REVIEWS ───────────────────────────────────────────────────────────────────
+let reviews = JSON.parse(localStorage.getItem('blessed_reviews') || '[]');
+
+function renderReviews() {
+    const container = document.getElementById('reviewList');
+    if (!reviews.length) {
+        container.innerHTML = '<p class="text-zinc-600 text-sm col-span-full text-center py-12">No hay testimonios aún.</p>';
+        return;
+    }
+    container.innerHTML = reviews.map((r, i) => `
+        <div class="review-card fade-up">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <p class="text-white font-bold text-sm">${r.name}</p>
+                    <p class="text-[#d4af37] text-sm mt-0.5">${'⭐'.repeat(r.stars)}</p>
+                </div>
+                <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ${r.visible ? 'bg-[#d4af37]/10 text-[#d4af37] border border-[#d4af37]/30' : 'bg-zinc-800 text-zinc-500 border border-zinc-700'}">${r.visible ? 'Visible' : 'Oculto'}</span>
+            </div>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-4">"${r.text}"</p>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleReview(${i})" class="text-xs font-bold text-zinc-500 hover:text-[#d4af37] transition-colors">${r.visible ? 'Ocultar' : 'Mostrar'}</button>
+                <span class="text-zinc-700">·</span>
+                <button onclick="editReview(${i})" class="text-xs text-zinc-500 hover:text-white transition-colors">
+                    <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button onclick="deleteReview(${i})" class="text-xs text-zinc-500 hover:text-red-400 transition-colors ml-auto">
+                    <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+let editingReviewIdx = null;
+function openReviewModal(idx=null) {
+    editingReviewIdx = idx;
+    if (idx !== null) {
+        document.getElementById('reviewName').value = reviews[idx].name;
+        document.getElementById('reviewText').value = reviews[idx].text;
+        document.getElementById('reviewStars').value = reviews[idx].stars;
+    } else {
+        document.getElementById('reviewName').value = '';
+        document.getElementById('reviewText').value = '';
+        document.getElementById('reviewStars').value = '5';
+    }
+    document.getElementById('reviewModal').classList.remove('hidden');
+    document.getElementById('reviewModal').classList.add('flex');
+}
+function closeReviewModal() {
+    document.getElementById('reviewModal').classList.add('hidden');
+    document.getElementById('reviewModal').classList.remove('flex');
+    editingReviewIdx = null;
+}
+function saveReview() {
+    const name = document.getElementById('reviewName').value.trim();
+    const text = document.getElementById('reviewText').value.trim();
+    const stars = +document.getElementById('reviewStars').value;
+    if (!name || !text) return;
+    const review = { name, text, stars, visible: true };
+    if (editingReviewIdx !== null) reviews[editingReviewIdx] = review;
+    else reviews.push(review);
+    localStorage.setItem('blessed_reviews', JSON.stringify(reviews));
+    closeReviewModal();
+    renderReviews();
+    showToast('✓ Reseña guardada', 'success');
+}
+function editReview(i) { openReviewModal(i); }
+function toggleReview(i) {
+    reviews[i].visible = !reviews[i].visible;
+    localStorage.setItem('blessed_reviews', JSON.stringify(reviews));
+    renderReviews();
+}
+function deleteReview(i) {
+    reviews.splice(i, 1);
+    localStorage.setItem('blessed_reviews', JSON.stringify(reviews));
+    renderReviews();
+    showToast('🗑 Reseña eliminada', 'success');
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+    const all = [...workingPerfumes, ...workingVapes, ...workingBarber];
+    const total = all.length;
+    const avail = all.filter(p => (p.status === 'available' || !p.status) && (p.stock === null || p.stock > 3)).length;
+    const low = all.filter(p => p.stock !== null && p.stock > 0 && p.stock <= 3).length;
+    const out = all.filter(p => p.stock !== null && p.stock <= 0).length;
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statAvailable').textContent = avail;
+    document.getElementById('statLow').textContent = low;
+    document.getElementById('statOut').textContent = out;
+}
+</script>
 </body>
-
 </html>

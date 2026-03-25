@@ -1,18 +1,18 @@
 /* ─── VARIABLES & DESIGN TOKENS ──────────────────────────────────────────── */
 :root {
-  --gold: #c5a059;
-  --gold-light: #d6b97a;
-  --gold-dark: #a07d3a;
-  --bg-base: #080808;
-  --bg-card: #111111;
-  --bg-card2: #161616;
-  --border: rgba(255,255,255,0.06);
-  --border-gold: rgba(197,160,89,0.35);
-  --text-muted: #6b7280;
+  --gold: #d4af37;        /* Premium Gold */
+  --gold-light: #f9d863;
+  --gold-dark: #b58d19;
+  --bg-base: #050505;
+  --bg-card: rgba(17, 17, 17, 0.6);
+  --bg-card2: rgba(22, 22, 22, 0.7);
+  --border: rgba(255,255,255,0.08);
+  --border-gold: rgba(212,175,55,0.4);
+  --text-muted: #8892b0;
   --text-dim: #3f3f46;
   --radius: 20px;
   --radius-sm: 12px;
-  --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  --transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
 }
 
 /* ─── RESET & BASE ────────────────────────────────────────────────────────── */
@@ -109,6 +109,8 @@ body::before {
 /* ─── PRODUCT CARDS ───────────────────────────────────────────────────────── */
 .product-card {
   background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
@@ -409,9 +411,10 @@ input:checked + .toggle-slider::before { transform: translateX(18px); }
 .btn-gold {
   position: relative;
   overflow: hidden;
-  background: var(--gold);
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
   color: #000;
   font-weight: 900;
+  box-shadow: 0 4px 15px rgba(212,175,55,0.2);
   transition: var(--transition);
 }
 .btn-gold::after {
@@ -419,7 +422,7 @@ input:checked + .toggle-slider::before { transform: translateX(18px); }
   position: absolute;
   top: 0; left: -100%;
   width: 60%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
   animation: shimmer 2.5s ease infinite;
 }
 @keyframes shimmer {
@@ -427,7 +430,11 @@ input:checked + .toggle-slider::before { transform: translateX(18px); }
   60%  { left: 130%; }
   100% { left: 130%; }
 }
-.btn-gold:hover { background: var(--gold-light); box-shadow: 0 8px 30px rgba(197,160,89,0.35); transform: translateY(-2px); }
+.btn-gold:hover { 
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+  box-shadow: 0 10px 40px rgba(212,175,55,0.4); 
+  transform: translateY(-2px); 
+}
 
 /* ─── PERFUME THUMB ───────────────────────────────────────────────────────── */
 .perfume-thumb {

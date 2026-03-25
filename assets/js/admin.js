@@ -161,6 +161,7 @@ function render() {
     if (currentCategory === 'perfumes') renderPerfumes();
     else if (currentCategory === 'vapes') renderVapes();
     else renderBarber();
+    if (typeof updateStats === 'function') updateStats();
 }
 
 // ─── PERFUMES ─────────────────────────────────────────────────────────────────
@@ -718,5 +719,81 @@ function showToast(message, type) {
 window.addEventListener('beforeunload', e => {
     if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = ''; }
 });
+
+// ─── HERRAMIENTAS / CALCULADORAS ──────────────────────────────────────────────
+function switchMainView(view) {
+    const invSec = document.getElementById('inventorySection');
+    const toolSec = document.getElementById('toolsSection');
+    const tabInv = document.getElementById('tabInventory');
+    const tabTool = document.getElementById('tabTools');
+
+    if (view === 'inventory') {
+        invSec.classList.remove('hidden');
+        toolSec.classList.add('hidden');
+        tabInv.className = "main-tab text-[#d4af37] font-bold border-b-2 border-[#d4af37] pb-3 px-1 uppercase tracking-widest text-xs md:text-sm whitespace-nowrap transition-colors";
+        tabTool.className = "main-tab text-zinc-500 font-bold hover:text-white border-b-2 border-transparent pb-3 px-1 uppercase tracking-widest text-xs md:text-sm whitespace-nowrap transition-colors";
+    } else {
+        invSec.classList.add('hidden');
+        toolSec.classList.remove('hidden');
+        tabTool.className = "main-tab text-[#d4af37] font-bold border-b-2 border-[#d4af37] pb-3 px-1 uppercase tracking-widest text-xs md:text-sm whitespace-nowrap transition-colors";
+        tabInv.className = "main-tab text-zinc-500 font-bold hover:text-white border-b-2 border-transparent pb-3 px-1 uppercase tracking-widest text-xs md:text-sm whitespace-nowrap transition-colors";
+        // Calculate immediately when opening to prepopulate labels
+        calculateMargin();
+        convertCurrency();
+    }
+}
+
+function calculateMargin() {
+    const cost = parseFloat(document.getElementById('calcCost').value) || 0;
+    const margin = parseFloat(document.getElementById('calcMargin').value) || 0;
+    
+    // Cálculo: Costo Base + Margen %
+    const profit = cost * (margin / 100);
+    const finalPrice = cost + profit;
+
+    document.getElementById('calcResultLabel').textContent = Math.round(finalPrice).toLocaleString('es-UY');
+    document.getElementById('calcProfitLabel').textContent = Math.round(profit).toLocaleString('es-UY');
+}
+
+function convertCurrency() {
+    const usd = parseFloat(document.getElementById('rateUSD').value) || 1;
+    const eur = parseFloat(document.getElementById('rateEUR').value) || 1;
+    const brl = parseFloat(document.getElementById('rateBRL').value) || 1;
+
+    const rates = { USD: usd, EUR: eur, BRL: brl };
+    
+    const amount = parseFloat(document.getElementById('amountToConvert').value) || 0;
+    const from = document.getElementById('currencyFrom').value;
+    
+    const result = amount * rates[from];
+    document.getElementById('convertedResult').textContent = Math.round(result).toLocaleString('es-UY');
+}
+
+async function fetchLiveExchangeRates() {
+    const btn = event.currentTarget || event.target.closest('button');
+    if (btn) btn.classList.add('spin');
+    
+    try {
+        const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        const data = await res.json();
+        const baseUYU = data.rates.UYU;
+        const eurusd = data.rates.EUR;
+        const brlusd = data.rates.BRL;
+
+        // USD a UYU
+        document.getElementById('rateUSD').value = baseUYU.toFixed(2);
+        // 1 EUR en USD (1 / rate) * baseUYU
+        document.getElementById('rateEUR').value = ((1 / eurusd) * baseUYU).toFixed(2);
+        // 1 BRL en USD
+        document.getElementById('rateBRL').value = ((1 / brlusd) * baseUYU).toFixed(2);
+
+        convertCurrency();
+        showToast('✓ Cotizaciones actualizadas', 'success');
+    } catch (err) {
+        showToast('✗ Error obteniendo cotizaciones', 'error');
+    } finally {
+        if (btn) setTimeout(() => btn.classList.remove('spin'), 500);
+    }
+}
 
 init();
