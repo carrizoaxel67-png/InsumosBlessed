@@ -309,34 +309,46 @@ body::before {
 .table-container::-webkit-scrollbar-thumb:hover { background: var(--gold-dark); }
 
 .edit-input, .stock-input {
-  background: #0a0a0a;
-  border: 1px solid #222;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   color: #fff;
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.75rem;
   font-family: 'Outfit', monospace;
-  font-size: 0.8rem;
-  transition: border-color 0.2s;
+  font-size: 0.85rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
-  max-width: 90px;
+  max-width: 110px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
 }
 .edit-input:focus, .stock-input:focus {
   outline: none;
-  border-color: var(--gold-dark);
+  border-color: rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.05);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1), inset 0 2px 4px rgba(0,0,0,0.5);
+}
+.edit-input:hover, .stock-input:hover {
+  border-color: rgba(255, 255, 255, 0.15);
 }
 .stock-input { max-width: 64px; text-align: center; }
 
 .mobile-edit-input {
-  background: #0a0a0a;
-  border: 1px solid #222;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   color: #fff;
   padding: 0.5rem 0.75rem;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   width: 100%;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
 }
-.mobile-edit-input:focus { outline: none; border-color: var(--gold-dark); }
+.mobile-edit-input:focus { 
+  outline: none; 
+  border-color: rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.05);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
 
 .hidden-product { opacity: 0.35; }
 

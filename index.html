@@ -58,16 +58,15 @@
         <div class="flex items-center gap-4">
           <!-- SVG Logo Mark -->
           <div id="secretLogoTrigger" onclick="toggleSecretCategory()"
-            class="relative h-14 w-14 md:h-16 md:w-16 rounded-full border-2 gold-border bg-black flex items-center justify-center cursor-pointer shrink-0 shadow-[0_0_20px_rgba(197,160,89,0.15)]">
-            <!-- B letter SVG -->
-            <svg width="28" height="34" viewBox="0 0 28 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 3H16C20.418 3 24 6.582 24 11C24 13.21 23.105 15.21 21.657 16.657C23.696 18.075 25 20.387 25 23C25 27.418 21.418 31 17 31H4V3Z" stroke="#c5a059" stroke-width="1.5" fill="none"/>
-              <path d="M4 3H15C18.866 3 22 6.134 22 10C22 13.866 18.866 17 15 17H4V3Z" fill="rgba(197,160,89,0.08)"/>
-              <path d="M4 17H17C21.418 17 25 20.582 25 25C25 29.418 21.418 33 17 33H4V17Z" fill="rgba(197,160,89,0.06)"/>
-              <line x1="4" y1="17" x2="20" y2="17" stroke="#c5a059" stroke-width="1.2" opacity="0.5"/>
+            class="relative h-14 w-14 md:h-16 md:w-16 rounded-xl border border-zinc-800 bg-black flex items-center justify-center cursor-pointer shrink-0 shadow-[inset_0_2px_4px_rgba(255,255,255,0.05)] transition-all hover:border-[#c5a059]/50">
+            <!-- Premium Hexagon B Logo -->
+            <svg width="28" height="32" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-[0_0_10px_rgba(197,160,89,0.3)]">
+              <path d="M12 2L22 7.5V18.5L12 24L2 18.5V7.5L12 2Z" stroke="#c5a059" stroke-width="1.5" stroke-linejoin="round" fill="rgba(197,160,89,0.05)"/>
+              <path d="M9 9H13.5C14.8807 9 16 10.1193 16 11.5C16 12.8807 14.8807 14 13.5 14H9V9Z" stroke="#c5a059" stroke-width="1.5"/>
+              <path d="M9 14H14.5C15.8807 14 17 15.1193 17 16.5C17 17.8807 15.8807 19 14.5 19H9V14Z" stroke="#c5a059" stroke-width="1.5"/>
             </svg>
             <!-- Orbiting dot -->
-            <span class="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-[#c5a059] border-2 border-[#080808] shadow-[0_0_8px_rgba(197,160,89,0.9)]"></span>
+            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#c5a059] border border-[#080808] shadow-[0_0_8px_rgba(197,160,89,0.9)] animate-pulse"></span>
           </div>
 
           <!-- Text brand -->
@@ -130,7 +129,9 @@
         <button onclick="selectCategoryMobile('perfumes')"
           class="mobile-menu-item active flex items-center justify-between bg-zinc-900/40 border border-zinc-800 p-5 rounded-2xl w-full text-left group">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center text-xl shrink-0">💎</div>
+            <div class="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center text-[#c5a059] shrink-0 shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            </div>
             <div>
               <p class="text-xl font-black text-white group-[.active]:text-[#c5a059] leading-none">Catálogo VIP</p>
               <p class="text-zinc-500 text-sm font-medium mt-1">Variedad Premium</p>
@@ -144,7 +145,9 @@
         <button onclick="selectCategoryMobile('barber')"
           class="mobile-menu-item flex items-center justify-between bg-zinc-900/40 border border-zinc-800 p-5 rounded-2xl w-full text-left group">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center text-xl shrink-0">✂️</div>
+            <div class="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-300 shrink-0 shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"></path></svg>
+            </div>
             <div>
               <p class="text-xl font-black text-white group-[.active]:text-[#c5a059] leading-none">Insumos</p>
               <p class="text-zinc-500 text-sm font-medium mt-1">Productos de Barbería</p>
@@ -198,15 +201,18 @@
     <div class="hidden md:flex items-end gap-1 border-b border-zinc-900 mb-8 overflow-x-auto relative">
       <button id="catTabPerfumes" onclick="setCategory('perfumes')"
         class="cat-tab active flex items-center gap-2 mr-6 text-white text-lg drop-shadow-[0_2px_10px_rgba(197,160,89,0.5)]">
-        <span class="text-xl">💎</span> Catálogo VIP
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+        Catálogo VIP
       </button>
       <button id="catTabBarber" onclick="setCategory('barber')"
-        class="cat-tab flex items-center gap-2 mr-6">
-        <span class="text-lg">✂️</span> Insumos de Barbería
+        class="cat-tab flex items-center gap-2 mr-6 text-zinc-500 hover:text-white transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"></path></svg>
+        Insumos de Barbería
       </button>
       <button id="catTabVapes" onclick="toggleSecretCategory()"
-        class="cat-tab hidden items-center gap-2">
-        <span class="text-lg">💨</span> Vaporizadores
+        class="cat-tab hidden items-center gap-2 text-zinc-500 hover:text-white transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15h12M3 9h18M3 21h6"></path></svg>
+        Vaporizadores
       </button>
     </div>
 
@@ -228,13 +234,13 @@
         <!-- Brand filter -->
         <select id="brandFilter"
           class="bg-transparent border-none outline-none text-zinc-300 text-sm font-semibold appearance-none cursor-pointer px-2 py-3 md:py-2">
-          <option value="all">💎 Todas las casas</option>
+          <option value="all">Todas las marcas</option>
           <option value="AFNAN">Afnan</option>
           <option value="LATTAFA">Lattafa</option>
           <option value="ARMAF">Armaf</option>
           <option value="BHARARA">Bharara</option>
           <option value="AL_HARAMAIN">Al Haramain</option>
-          <option value="OTROS">Otras</option>
+          <option value="OTROS">Otras / Alternativas</option>
         </select>
 
         <!-- Divider -->
@@ -243,10 +249,10 @@
         <!-- Gender filter -->
         <select id="genderFilter"
           class="bg-transparent border-none outline-none text-zinc-300 text-sm font-semibold appearance-none cursor-pointer px-2 py-3 md:py-2 md:pr-4">
-          <option value="all">✨ Todos</option>
-          <option value="H">👔 Masculino</option>
-          <option value="M">🌸 Femenino</option>
-          <option value="U">⚡ Unisex</option>
+          <option value="all">Todos los Perfiles</option>
+          <option value="H">Masculino</option>
+          <option value="M">Femenino</option>
+          <option value="U">Unisex</option>
         </select>
       </div>
     </div>
@@ -292,7 +298,8 @@
         <div class="p-8 flex flex-col justify-between">
           <div>
             <p id="modalBrand" class="text-[#c5a059] text-[10px] font-black uppercase tracking-[0.3em] mb-3"></p>
-            <h2 id="modalTitle" class="text-2xl md:text-3xl font-black text-white leading-tight mb-6"></h2>
+            <h2 id="modalTitle" class="text-2xl md:text-3xl font-black text-white leading-tight mb-4"></h2>
+            <p id="modalDesc" class="text-zinc-400 text-sm leading-relaxed hidden mb-6"></p>
             <div class="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 mb-8">
               <span class="block text-zinc-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1">Precio al público</span>
               <span class="text-3xl font-black font-mono text-white">$ <span id="mFinal"></span></span>

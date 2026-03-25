@@ -259,7 +259,7 @@ function renderBarber() {
     if (publicBarber.length === 0) {
         inventoryGallery.innerHTML = `
             <div class="col-span-full text-center py-24 text-zinc-600 animate-fade-in-up">
-                <p class="text-5xl mb-4">✂️</p>
+                <svg class="w-16 h-16 mx-auto mb-6 text-zinc-700/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"></path></svg>
                 <p class="font-black uppercase tracking-widest text-sm gold-text">Próximamente</p>
                 <p class="text-xs mt-2">Insumos de barbería disponibles pronto</p>
             </div>`;
@@ -279,7 +279,9 @@ function renderBarber() {
                 <span class="absolute top-3 left-3 text-[9px] font-black border border-amber-900/50 text-amber-400 bg-amber-900/15 px-1.5 py-0.5 rounded-md z-10">✂ BARBERÍA</span>
                 ${getStatusTag(b)}
                 <img src="${b.img}" loading="lazy" decoding="async" class="w-full h-full object-contain" alt="${b.name}" onerror="this.parentElement.querySelector('.img-ph')?.classList.remove('hidden')">
-                <div class="img-ph hidden absolute inset-0 flex items-center justify-center text-5xl text-zinc-700">✂️</div>
+                <div class="img-ph hidden absolute inset-0 flex items-center justify-center text-zinc-800">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"></path></svg>
+                </div>
             </div>
             <div class="p-4 flex flex-col flex-1">
                 <p class="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">${b.brand}</p>
@@ -358,6 +360,17 @@ function showInfo(item, type) {
     document.getElementById('modalTitle').textContent = item.name;
     document.getElementById('modalBrand').textContent =
         type === 'perfume' ? item.brand.replace('_', ' ') : item.brand;
+        
+    const descEl = document.getElementById('modalDesc');
+    if (descEl) {
+        if (item.description) {
+            descEl.textContent = item.description;
+            descEl.classList.remove('hidden');
+        } else {
+            descEl.classList.add('hidden');
+        }
+    }
+
     const mImg = document.getElementById('mImg');
     mImg.src = item.img;
     document.getElementById('mFinal').textContent = item.price.toLocaleString();

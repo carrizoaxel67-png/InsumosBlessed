@@ -255,8 +255,12 @@
     <!-- Logo -->
     <div class="logo-area">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full border-2 border-[#d4af37] bg-black flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
-                <span class="text-[#d4af37] font-black text-lg italic">B</span>
+            <div class="w-10 h-10 rounded-xl border border-zinc-800 bg-black flex items-center justify-center shrink-0 shadow-[inset_0_2px_4px_rgba(255,255,255,0.05)]">
+                <svg width="20" height="24" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+                    <path d="M12 2L22 7.5V18.5L12 24L2 18.5V7.5L12 2Z" stroke="#d4af37" stroke-width="1.5" stroke-linejoin="round" fill="rgba(212,175,55,0.1)"/>
+                    <path d="M9 9H13.5C14.8807 9 16 10.1193 16 11.5C16 12.8807 14.8807 14 13.5 14H9V9Z" stroke="#d4af37" stroke-width="1.5"/>
+                    <path d="M9 14H14.5C15.8807 14 17 15.1193 17 16.5C17 17.8807 15.8807 19 14.5 19H9V14Z" stroke="#d4af37" stroke-width="1.5"/>
+                </svg>
             </div>
             <div>
                 <p class="text-white font-black text-base uppercase tracking-wide leading-none">Blessed</p>
@@ -280,6 +284,10 @@
         <div class="nav-item" id="navCalculadora" onclick="switchSection('calculadora')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             Calculadora
+        </div>
+        <div class="nav-item" id="navReservas" onclick="switchSection('reservas')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Reservas
         </div>
         <div class="nav-item" id="navReviews" onclick="switchSection('reviews')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
@@ -315,12 +323,32 @@
 
     <!-- ══ SECCIÓN: CATÁLOGO ══ -->
     <section id="sectionCatalogo" class="p-6 md:p-8 fade-up">
-        <div class="flex items-center justify-between mb-6 mt-10 md:mt-0">
+        
+        <!-- Header & Weather -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 mt-10 md:mt-0">
             <div>
-                <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Inventario</h1>
-                <p class="text-zinc-500 text-sm mt-1">Gestioná los productos del catálogo.</p>
+                <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">CPanel Operativo</h1>
+                <p class="text-zinc-500 text-sm mt-1">Gestión integral del ecosistema comercial.</p>
             </div>
-            <div class="flex items-center gap-3">
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Weather Widget (San José de Mayo) -->
+                <div id="weatherWidget" class="hidden md:flex items-center gap-3 bg-[rgba(15,15,15,0.8)] border border-[rgba(255,255,255,0.07)] px-4 py-2 rounded-xl backdrop-blur-md">
+                    <div class="w-8 h-8 rounded-full bg-black border border-zinc-800 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-500">San José de Mayo</p>
+                        <p class="text-sm font-black text-white" id="weatherTemp">--°C</p>
+                    </div>
+                </div>
+
+                <button id="btnSave" onclick="saveChanges()" class="btn-gold flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest hidden md:flex">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Guardar Cambios
+                </button>
+            </div>
+        </div>
                 <button id="btnSave" onclick="saveChanges()" class="btn-gold hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     Guardar
@@ -429,42 +457,87 @@
     <!-- ══ SECCIÓN: CALCULADORA ══ -->
     <section id="sectionCalculadora" class="hidden p-6 md:p-8 fade-up">
         <div class="mb-8 mt-10 md:mt-0">
-            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Calculadora</h1>
-            <p class="text-zinc-500 text-sm mt-1">Herramienta rápida de márgenes.</p>
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Máquina de Rentabilidad</h1>
+            <p class="text-zinc-500 text-sm mt-1">Algoritmo de cálculo dinámico para evaluación de márgenes.</p>
         </div>
 
-        <div class="max-w-md">
-            <div class="bg-[#0c0c0c] border border-zinc-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-                <div class="absolute -top-16 -right-16 w-32 h-32 bg-[#d4af37] rounded-full mix-blend-screen filter blur-[60px] opacity-10 pointer-events-none"></div>
+        <div class="w-full max-w-4xl mx-auto">
+            <div class="bg-gradient-to-br from-[#0c0c0c] to-[#050505] border border-zinc-800 rounded-[28px] p-8 shadow-2xl relative overflow-hidden">
+                <div class="absolute -top-32 -right-32 w-64 h-64 bg-[#d4af37] rounded-full mix-blend-screen filter blur-[100px] opacity-10 pointer-events-none"></div>
 
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-2 font-bold">Costo de Producción</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-3 text-zinc-500 font-bold text-sm">$</span>
-                            <input type="number" id="calcCost" value="0" class="admin-input pl-7 text-lg font-mono" oninput="calculateMargin()">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-center">
+                    
+                    <!-- Lado Izquierdo: Inputs (7 columnas) -->
+                    <div class="md:col-span-7 space-y-6">
+                        <div class="p-5 bg-black/40 border border-zinc-800/50 rounded-2xl grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-zinc-500 text-[10px] uppercase tracking-[0.2em] block mb-2 font-black">Costo Unitario (UYU)</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-4 text-zinc-500 font-black text-lg">$</span>
+                                    <input type="number" id="calcCost" value="0" class="admin-input !pl-10 !h-14 text-xl font-mono text-white bg-[#0f0f0f] !border-zinc-800 focus:!border-[#d4af37]" oninput="calculateMargin()">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-zinc-500 text-[10px] uppercase tracking-[0.2em] block mb-2 font-black">Margen Deseado (%)</label>
+                                <div class="relative">
+                                    <input type="number" id="calcMargin" value="50" class="admin-input !h-14 text-xl font-mono text-[#d4af37] font-black !pr-10 bg-[#0f0f0f] !border-zinc-800 focus:!border-[#d4af37]" oninput="calculateMargin()">
+                                    <span class="absolute right-4 top-4 text-zinc-500 font-black text-lg">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 bg-black/40 border border-zinc-800/50 rounded-2xl grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-zinc-500 text-[10px] uppercase tracking-[0.2em] block mb-2 font-black">Costo de Envío / Flete</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-3 text-zinc-500 font-bold">$</span>
+                                    <input type="number" id="calcEnvio" value="0" class="admin-input !pl-8 bg-[#0f0f0f] font-mono" oninput="calculateMargin()">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-zinc-500 text-[10px] uppercase tracking-[0.2em] block mb-2 font-black">Aplicar IVA (22%)</label>
+                                <label class="toggle-switch toggle-switch-lg mt-1">
+                                    <input type="checkbox" id="calcIva" onchange="calculateMargin()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-2 font-bold">Margen (%)</label>
-                        <div class="relative">
-                            <input type="number" id="calcMargin" value="50" class="admin-input text-lg font-mono text-[#d4af37] font-black pr-8" oninput="calculateMargin()">
-                            <span class="absolute right-3 top-3 text-zinc-500 font-bold text-sm">%</span>
+
+                    <!-- Lado Derecho: Resultados (5 columnas) -->
+                    <div class="md:col-span-5 h-full">
+                        <div class="bg-[#d4af37]/5 border border-[#d4af37]/20 rounded-2xl p-6 h-full flex flex-col justify-center">
+                            <p class="text-[#d4af37] text-[10px] uppercase tracking-[0.2em] font-black mb-1">Precio Final Sugerido</p>
+                            <p class="text-white font-black text-5xl font-mono tracking-tighter mb-8">$<span id="calcResult">0</span></p>
+
+                            <div class="space-y-4 pt-6 border-t border-[#d4af37]/10">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-zinc-500 text-xs font-bold uppercase tracking-widest">Ganancia Neta</span>
+                                    <span class="text-green-400 font-black text-xl font-mono">+$<span id="calcProfit">0</span></span>
+                                </div>
+                                <div class="flex justify-between items-center text-zinc-600">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest">Costo Total</span>
+                                    <span class="text-xs font-mono">$<span id="calcTotalCostOut">0</span></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-[#080808] border border-zinc-800 rounded-xl p-4">
-                        <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold mb-2">Precio Venta</p>
-                        <p class="text-white font-black text-2xl font-mono">$<span id="calcResult">0</span></p>
-                    </div>
-                    <div class="bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-xl p-4">
-                        <p class="text-[#d4af37] text-[10px] uppercase tracking-widest font-bold mb-2">Ganancia Un.</p>
-                        <p class="text-[#d4af37] font-black text-2xl font-mono">+$<span id="calcProfit">0</span></p>
-                    </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- ══ SECCIÓN: RESERVAS (Próximamente/Empty State) ══ -->
+    <section id="sectionReservas" class="hidden p-6 md:p-8 fade-up h-full flex flex-col">
+        <div class="mb-8 mt-10 md:mt-0">
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Gestor de Reservas</h1>
+            <p class="text-zinc-500 text-sm mt-1">Agenda para clientes o pedidos mayoristas.</p>
+        </div>
+        <div class="flex flex-col items-center justify-center flex-1 py-12 text-zinc-700 bg-[rgba(15,15,15,0.4)] border border-dashed border-zinc-800 rounded-[28px]">
+            <svg class="w-16 h-16 mb-6 opacity-30 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <p class="text-xl font-black tracking-widest uppercase mb-2 text-white/50">Módulo en Desarrollo</p>
+            <p class="text-sm text-zinc-500 max-w-sm text-center leading-relaxed">Las herramientas de calendarización y facturación automática estarán disponibles muy pronto para tu plataforma.</p>
         </div>
     </section>
 
@@ -593,13 +666,28 @@
                 <div>
                     <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Estado / Etiqueta</label>
                     <select id="editStatus" class="admin-input appearance-none">
-                        <option value="available">✅ DISPONIBLE</option>
-                        <option value="house">🏠 PRODUCTO DE LA CASA</option>
-                        <option value="low_stock">⚡ POCAS UNIDADES</option>
-                        <option value="out_of_stock">❌ SIN STOCK</option>
-                        <option value="preorder">📦 DISPONIBLE POR ENCARGUE</option>
-                        <option value="unavailable">🚫 NO DISPONIBLE</option>
+                        <option value="available">DISPONIBLE</option>
+                        <option value="house">PRODUCTO DE LA CASA</option>
+                        <option value="low_stock">POCAS UNIDADES</option>
+                        <option value="out_of_stock">SIN STOCK</option>
+                        <option value="preorder">DISPONIBLE POR ENCARGUE</option>
+                        <option value="unavailable">NO DISPONIBLE</option>
                     </select>
+                </div>
+                <!-- New fields: Brand, Discount, Description -->
+                <div class="grid grid-cols-2 gap-3 items-center">
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Marca</label>
+                        <input id="editBrand" type="text" placeholder="Ej: Lattafa" class="admin-input uppercase">
+                    </div>
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Descuento (%)</label>
+                        <input id="editDiscount" type="number" min="0" max="100" placeholder="0" class="admin-input font-mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5 font-bold">Descripción / Notas</label>
+                    <textarea id="editDescription" rows="2" placeholder="Notas sobre el producto..." class="admin-input resize-none"></textarea>
                 </div>
             </div>
             <div class="flex flex-col md:flex-row gap-3 mt-8 pb-safe">
@@ -615,19 +703,21 @@
 </div>
 
 <!-- ══ MODAL: NUEVA RESEÑA ══ -->
-<div id="reviewModal" class="fixed inset-0 bg-black/85 hidden items-center justify-center p-4 z-[80] backdrop-blur-md">
+<div id="reviewModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-[80] backdrop-blur-xl">
     <div class="bg-[#0e0e0e] border border-zinc-800 w-full max-w-md rounded-[28px] shadow-2xl">
         <div class="p-6 md:p-8">
-            <h3 class="text-lg font-black text-white mb-5">Nueva Reseña</h3>
+            <h3 class="text-lg font-black text-white mb-5">Nueva Reseña Operativa</h3>
             <div class="space-y-4">
-                <input type="text" id="reviewName" placeholder="Nombre del cliente" class="admin-input">
-                <textarea id="reviewText" placeholder="Texto de la reseña..." rows="3" class="admin-input resize-none"></textarea>
+                <input type="text" id="reviewName" placeholder="Nombre completo del cliente" class="admin-input">
+                <textarea id="reviewText" placeholder="Redactá la experiencia..." rows="3" class="admin-input resize-none"></textarea>
                 <div class="flex items-center gap-3">
-                    <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">Estrellas:</label>
-                    <select id="reviewStars" class="admin-input appearance-none w-28">
-                        <option value="5">⭐⭐⭐⭐⭐</option>
-                        <option value="4">⭐⭐⭐⭐</option>
-                        <option value="3">⭐⭐⭐</option>
+                    <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">Nivel de Satisfacción:</label>
+                    <select id="reviewStars" class="admin-input appearance-none w-28 text-center font-bold">
+                        <option value="5">5/5 Excelente</option>
+                        <option value="4">4/5 Muy Bueno</option>
+                        <option value="3">3/5 Bueno</option>
+                        <option value="2">2/5 Regular</option>
+                        <option value="1">1/5 Malo</option>
                     </select>
                 </div>
             </div>
@@ -647,12 +737,12 @@
 <script>
 // ── SIDEBAR / SECTIONS ──────────────────────────────────────────────────────
 function switchSection(name) {
-    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas'];
+    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas'];
     sections.forEach(s => {
         const el = document.getElementById('section' + s);
         if (el) el.classList.toggle('hidden', s.toLowerCase() !== name);
     });
-    const navMap = { catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora', reviews:'navReviews', divisas:'navDivisas' };
+    const navMap = { catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora', reviews:'navReviews', divisas:'navDivisas', reservas:'navReservas' };
     Object.entries(navMap).forEach(([k,id]) => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('active', k === name);

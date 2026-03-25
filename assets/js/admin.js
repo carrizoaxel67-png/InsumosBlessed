@@ -13,6 +13,19 @@ async function init() {
     setupListeners();
     initViews();
     render();
+    fetchWeather();
+}
+
+async function fetchWeather() {
+    try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.3375&longitude=-56.7136&current_weather=true');
+        const data = await res.json();
+        const temp = data.current_weather.temperature;
+        const el = document.getElementById('weatherTemp');
+        if (el) el.textContent = temp + '°C';
+    } catch(e) {
+        console.warn('Weather error', e);
+    }
 }
 
 async function loadProductsFromCloud() {
@@ -72,10 +85,11 @@ async function saveChanges() {
         } else {
             const err = await res.json().catch(() => ({}));
             showToast('✗ Error: ' + (err.error || res.status), 'error');
+            showToast('Error: ' + (err.error || res.status), 'error');
         }
     } catch (err) {
         console.error('Error guardando:', err);
-        showToast('✗ Error: ' + err.message, 'error');
+        showToast('Error: ' + err.message, 'error');
     } finally {
         btn.innerHTML = originalHTML;
         btn.disabled = false;
@@ -88,6 +102,20 @@ function markUnsaved() {
         hasUnsavedChanges = true;
         document.getElementById('unsavedBanner').classList.remove('hidden');
     }
+}
+
+// ── SIDEBAR / SECTIONS ──────────────────────────────────────────────────────
+function switchSection(name) {
+    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas'];
+    sections.forEach(s => {
+        const el = document.getElementById('section' + s);
+        if (el) el.classList.toggle('hidden', s.toLowerCase() !== name);
+    });
+    const navMap = { catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora', reviews:'navReviews', divisas:'navDivisas', reservas:'navReservas' };
+    Object.entries(navMap).forEach(([k,id]) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', k === name);
+    });
 }
 
 // ─── CATEGORÍAS ──────────────────────────────────────────────────────────────
@@ -393,7 +421,7 @@ function renderMobileCards(items, category) {
         const badge = category === 'vapes'
             ? `<span class="text-[9px] font-bold border border-green-900/50 text-green-500 bg-green-900/10 px-1.5 py-0.5 rounded">${item.puffs} PUFFS</span>`
             : category === 'barber'
-                ? `<span class="text-[9px] font-bold border border-amber-900/50 text-amber-400 bg-amber-900/10 px-1.5 py-0.5 rounded">✂ BARBERÍA</span>`
+                ? `<span class="text-[9px] font-bold border border-amber-900/50 text-amber-400 bg-amber-900/10 px-1.5 py-0.5 rounded">BARBERÍA</span>`
                 : `<span class="text-[9px] font-bold border px-1.5 py-0.5 rounded ${getGenClass(item.gen)}">${item.gen}</span>`;
 
         card.innerHTML = `
@@ -488,20 +516,41 @@ function adjustStock(category, id, delta) {
 
 // ─── MODAL ────────────────────────────────────────────────────────────────────
 function openEditModal(category, id) {
-    const arr = category === 'perfumes' ? workingPerfumes : category === 'vapes' ? workingVapes : workingBarber;
-    const item = arr.find(x => x.id === id);
-    if (!item) return;
+    let item;
+    if (id === 'new') {
+        item = {
+            id: 'new',
+            name: '', cost: 0, price: 0, stock: null, visible: true, status: 'available', img: '',
+            brand: category === 'perfumes' ? 'OTROS' : (category === 'vapes' ? 'GENERICO' : 'INSUMOS'),
+            description: '', discount: 0
+        };
+        document.getElementById('editModalSKU').textContent = 'NUEVO';
+    } else {
+        const arr = category === 'perfumes' ? workingPerfumes : category === 'vapes' ? workingVapes : workingBarber;
+        item = arr.find(x => x.id === id);
+        if (!item) return;
+        document.getElementById('editModalSKU').textContent = id;
+    }
+    
     editingId = { category, id };
 
-    document.getElementById('editModalSKU').textContent = id;
     document.getElementById('editName').value = item.name;
     document.getElementById('editCost').value = item.cost || 0;
-    document.getElementById('editPrice').value = item.price;
+    document.getElementById('editPrice').value = item.price || 0;
     document.getElementById('editStock').value = item.stock ?? '';
     document.getElementById('editVisible').checked = item.visible !== false;
     document.getElementById('editStatus').value = item.status || 'available';
-    document.getElementById('editImgPreview').src = item.img || 'https://via.placeholder.com/300x300/000000/ffffff?text=X';
+    document.getElementById('editImgPreview').src = item.img || 'https://via.placeholder.com/300x300/111111/c5a059?text=Nuevo';
     document.getElementById('editImgFile').value = '';
+
+    const brandEl = document.getElementById('editBrand');
+    if (brandEl) brandEl.value = item.brand || '';
+    
+    const descEl = document.getElementById('editDescription');
+    if (descEl) descEl.value = item.description || '';
+    
+    const discEl = document.getElementById('editDiscount');
+    if (discEl) discEl.value = item.discount || 0;
 
     const modal = document.getElementById('editModal');
     modal.classList.remove('hidden');
@@ -513,7 +562,17 @@ function saveEditModal() {
     if (!editingId) return;
     const { category, id } = editingId;
     const arr = category === 'perfumes' ? workingPerfumes : category === 'vapes' ? workingVapes : workingBarber;
-    const item = arr.find(x => x.id === id);
+    
+    let item;
+    if (id === 'new') {
+        const idPrefix = category === 'perfumes' ? 'PER-' : (category === 'vapes' ? 'VAP-' : 'BAR-');
+        item = { id: idPrefix + Date.now().toString().slice(-6) };
+        if (category === 'perfumes') item.gen = 'U';
+        arr.unshift(item); // Agregar al inicio
+    } else {
+        item = arr.find(x => x.id === id);
+    }
+    
     if (!item) return;
 
     item.name = document.getElementById('editName').value.trim();
@@ -524,10 +583,20 @@ function saveEditModal() {
     item.visible = document.getElementById('editVisible').checked;
     item.status = document.getElementById('editStatus').value;
     
-    // Si hay una imagen nueva en el preview generada por handleImageUpload, actualizarla
+    const brandEl = document.getElementById('editBrand');
+    if (brandEl) item.brand = brandEl.value.trim().toUpperCase() || 'GENERICO';
+    
+    const descEl = document.getElementById('editDescription');
+    if (descEl) item.description = descEl.value.trim();
+    
+    const discEl = document.getElementById('editDiscount');
+    if (discEl) item.discount = +discEl.value || 0;
+
     const previewSrc = document.getElementById('editImgPreview').src;
     if (previewSrc.startsWith('data:image/')) {
         item.img = previewSrc;
+    } else if (id === 'new' && !item.img) {
+        item.img = 'https://via.placeholder.com/300x300/111111/c5a059?text=Nuevo';
     }
 
     markUnsaved();
@@ -537,44 +606,7 @@ function saveEditModal() {
 
 // ─── AGREGAR NUEVO ITEM ───────────────────────────────────────────────────────
 function addNewItem() {
-    let idPrefix, baseBrand, itemName, gen;
-    if (currentCategory === 'perfumes') {
-        idPrefix = 'new_p_';
-        baseBrand = 'OTROS';
-        itemName = 'Nuevo Perfume';
-        gen = 'U';
-    } else if (currentCategory === 'vapes') {
-        idPrefix = 'new_v_';
-        baseBrand = 'GENERICO';
-        itemName = 'Nuevo Vaporizador';
-        gen = undefined;
-    } else {
-        idPrefix = 'new_b_';
-        baseBrand = 'INSUMOS';
-        itemName = 'Nuevo Insumo';
-        gen = undefined;
-    }
-
-    const newItem = {
-        id: idPrefix + Date.now().toString().slice(-6),
-        name: itemName,
-        brand: baseBrand,
-        cost: 0,
-        price: 0,
-        img: 'https://via.placeholder.com/300x300/000000/ffffff?text=Nuevo',
-        visible: true,
-        stock: 0,
-        status: 'available'
-    };
-    if (gen) newItem.gen = gen;
-    
-    if (currentCategory === 'perfumes') workingPerfumes.push(newItem);
-    else if (currentCategory === 'vapes') workingVapes.push(newItem);
-    else workingBarber.push(newItem);
-    
-    markUnsaved();
-    render();
-    openEditModal(currentCategory, newItem.id);
+    openEditModal(currentCategory, 'new');
 }
 
 function closeEditModal() {
@@ -746,13 +778,25 @@ function switchMainView(view) {
 function calculateMargin() {
     const cost = parseFloat(document.getElementById('calcCost').value) || 0;
     const margin = parseFloat(document.getElementById('calcMargin').value) || 0;
+    const envio = parseFloat(document.getElementById('calcEnvio')?.value) || 0;
+    const ivaCheck = document.getElementById('calcIva')?.checked || false;
     
-    // Cálculo: Costo Base + Margen %
-    const profit = cost * (margin / 100);
-    const finalPrice = cost + profit;
+    // Base cost + shipping
+    let baseCost = cost + envio;
+    // Add IVA to base cost if checked
+    if (ivaCheck) baseCost = baseCost * 1.22;
+    
+    // Profit and final price based on total real cost
+    const profit = baseCost * (margin / 100);
+    const finalPrice = baseCost + profit;
 
-    document.getElementById('calcResultLabel').textContent = Math.round(finalPrice).toLocaleString('es-UY');
-    document.getElementById('calcProfitLabel').textContent = Math.round(profit).toLocaleString('es-UY');
+    const resEl = document.getElementById('calcResult');
+    const profEl = document.getElementById('calcProfit');
+    const totEl = document.getElementById('calcTotalCostOut');
+    
+    if (resEl) resEl.textContent = Math.round(finalPrice).toLocaleString('es-UY');
+    if (profEl) profEl.textContent = Math.round(profit).toLocaleString('es-UY');
+    if (totEl) totEl.textContent = Math.round(baseCost).toLocaleString('es-UY');
 }
 
 function convertCurrency() {
