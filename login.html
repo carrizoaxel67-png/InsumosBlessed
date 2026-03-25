@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | BLESSED BARBERSHOP</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0c0c0c">
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <link rel="apple-touch-icon" href="assets/img/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-[32px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-[#c5a059] blur-[100px] opacity-20 rounded-full pointer-events-none"></div>
+
+        <div class="flex justify-center mb-8 relative z-10">
+            <div class="h-20 w-20 gold-border border-2 flex items-center justify-center rounded-full bg-black shadow-lg shadow-[#c5a059]/10">
+                <span class="gold-text font-black text-4xl italic">B</span>
+            </div>
+        </div>
+
+        <div class="text-center mb-10 relative z-10">
+            <h1 class="text-2xl font-bold tracking-tighter uppercase gold-text">Acceso Restringido</h1>
+            <p class="text-zinc-500 text-xs mt-2 tracking-widest font-semibold uppercase">Panel Administrativo</p>
+        </div>
+
+        <!-- Spinner de carga mientras el widget inicializa -->
+        <div id="loadingState" class="text-center py-6 relative z-10">
+            <div class="inline-block w-5 h-5 border-2 border-[#c5a059] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <!-- Botón de login — visible después de que el widget carga -->
+        <div id="loginBtn" class="hidden relative z-10">
+            <button id="btnLogin"
+                class="w-full gold-bg text-black font-black py-4 rounded-xl uppercase text-xs tracking-widest hover:opacity-90 transition-opacity">
+                Iniciar Sesión
+            </button>
+        </div>
+
+        <div class="mt-8 text-center relative z-10">
+            <a href="index.html" class="text-zinc-500 text-xs hover:text-white transition-colors underline decoration-zinc-800 underline-offset-4 tracking-wider">← Volver al Catálogo</a>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar widget limpio — sin mostrar estados de sesión previos
+        netlifyIdentity.init({ container: '#loginBtn' });
+
+        // Cuando el widget inicializa → mostrar el botón, ocultar spinner
+        netlifyIdentity.on('init', function() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('loginBtn').classList.remove('hidden');
+        });
+
+        // Login exitoso → ir al admin (el CDN de Netlify verifica el rol)
+        netlifyIdentity.on('login', function() {
+            netlifyIdentity.close();
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('loginBtn').classList.add('hidden');
+            window.location.href = '/admin.html';
+        });
+
+        // Abrir modal de login al hacer click
+        document.getElementById('btnLogin').addEventListener('click', function() {
+            netlifyIdentity.open('login');
+        });
+
+        // Si el widget no carga en 4 segundos, mostrar botón igual
+        setTimeout(function() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('loginBtn').classList.remove('hidden');
+        }, 4000);
+    </script>
+</body>
+</html>

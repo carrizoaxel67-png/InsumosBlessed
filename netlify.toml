@@ -1,0 +1,28 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+  edge_functions = "netlify/edge-functions"
+
+# Protección del panel admin
+# ── Regla 1: Si el usuario TIENE el rol "admin" → dejar pasar (sirve el archivo)
+[[redirects]]
+  from = "/admin.html"
+  to = "/admin.html"
+  status = 200
+  force = true
+  conditions = {Role = ["admin"]}
+
+# ── Regla 2: Si NO tiene el rol → redirigir al login
+[[redirects]]
+  from = "/admin.html"
+  to = "/login.html"
+  status = 302
+  force = true
+
+# Cabeceras de seguridad para el admin
+[[headers]]
+  for = "/admin.html"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Cache-Control = "no-store"

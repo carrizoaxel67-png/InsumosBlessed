@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario Admin | BLESSED BARBERSHOP</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0c0c0c">
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <link rel="apple-touch-icon" href="assets/img/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+
+    <!-- Netlify Identity Widget (para logout y getAuthToken) -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="assets/js/auth.js"></script>
+
+    <style>
+        /* ── Inputs inline (tabla desktop) ── */
+        .edit-input {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 2px 6px;
+            color: white;
+            font-family: monospace;
+            font-size: 0.75rem;
+            text-align: right;
+            width: 90px;
+            transition: all 0.15s;
+        }
+        .edit-input:focus { outline: none; border-color: #c5a059; background: rgba(197,160,89,0.08); }
+        .edit-input:hover { border-color: #3f3f46; }
+
+        .stock-input {
+            background: #18181b;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 2px 6px;
+            color: white;
+            font-family: monospace;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-align: center;
+            width: 60px;
+            transition: all 0.15s;
+        }
+        .stock-input:focus { outline: none; border-color: #c5a059; }
+        .stock-input:hover { border-color: #3f3f46; }
+
+        /* ── Toggle switch ── */
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background-color: #3f3f46; border-radius: 22px; transition: 0.2s;
+        }
+        .toggle-slider:before {
+            content: ""; position: absolute;
+            height: 16px; width: 16px; left: 3px; bottom: 3px;
+            background: white; border-radius: 50%; transition: 0.2s;
+        }
+        .toggle-switch input:checked + .toggle-slider { background-color: #22c55e; }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+        /* Toggle más grande en móvil */
+        .toggle-switch-lg { position: relative; display: inline-block; width: 52px; height: 28px; }
+        .toggle-switch-lg input { opacity: 0; width: 0; height: 0; }
+        .toggle-switch-lg .toggle-slider { border-radius: 28px; }
+        .toggle-switch-lg .toggle-slider:before { height: 20px; width: 20px; left: 4px; bottom: 4px; }
+        .toggle-switch-lg input:checked + .toggle-slider:before { transform: translateX(24px); }
+
+        /* ── Filas ocultas ── */
+        tr.hidden-product td { opacity: 0.35; }
+        .mobile-card.hidden-product { opacity: 0.45; }
+
+        /* ── Toast ── */
+        #saveToast { transition: all 0.3s ease; }
+
+        /* ── Spin ── */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+
+        /* ── Mobile card inputs ── */
+        .mobile-edit-input {
+            background: #18181b;
+            border: 1px solid #3f3f46;
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: white;
+            font-family: monospace;
+            font-size: 0.875rem;
+            width: 100%;
+            transition: border-color 0.15s;
+            -webkit-appearance: none;
+        }
+        .mobile-edit-input:focus { outline: none; border-color: #c5a059; }
+
+        /* ── Modal full-screen en móvil ── */
+        @media (max-width: 640px) {
+            #editModal > div {
+                max-width: 100%;
+                width: 100%;
+                border-radius: 24px 24px 0 0;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                max-height: 92vh;
+                overflow-y: auto;
+            }
+            #editModal {
+                align-items: flex-end;
+            }
+        }
+    </style>
+</head>
+
+<body class="p-3 md:p-8">
+
+    <!-- Toast de notificación -->
+    <div id="saveToast" class="fixed top-4 left-4 right-4 md:left-auto md:right-6 md:top-6 md:w-auto z-[100] hidden">
+        <div id="toastContent" class="flex items-center gap-3 px-5 py-4 rounded-xl border shadow-2xl backdrop-blur text-sm font-semibold text-center justify-center"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+
+        <!-- ── HEADER ── -->
+        <div class="flex items-center justify-between mb-5 md:mb-8 border-b border-zinc-800 pb-4 md:pb-6">
+            <div class="flex items-center gap-3">
+                <div class="h-12 w-12 md:h-16 md:w-16 gold-border border-2 flex items-center justify-center rounded-full bg-black shrink-0">
+                    <span class="gold-text font-black text-xl md:text-2xl italic">B</span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-xl md:text-3xl font-bold tracking-tighter uppercase gold-text">Blessed</h1>
+                        <span class="bg-red-500/10 text-red-500 border border-red-500/50 text-[9px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">Admin</span>
+                    </div>
+                    <p class="text-zinc-500 text-[10px] mt-0.5 tracking-widest font-semibold uppercase hidden md:block">Control de Stock Interno</p>
+                </div>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+                <!-- Guardar — visible en todas las pantallas -->
+                <button id="btnSave" onclick="saveChanges()"
+                    class="flex items-center gap-1.5 bg-[#c5a059] hover:bg-[#d4b06a] text-black font-black py-2.5 px-4 md:px-5 rounded-xl uppercase text-[10px] md:text-[11px] tracking-widest transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    <span>Guardar</span>
+                </button>
+                <button onclick="logout()"
+                    class="text-[9px] uppercase tracking-widest text-zinc-600 hover:text-white transition-colors underline underline-offset-4">Salir</button>
+            </div>
+        </div>
+
+        <!-- ── CATEGORY TOGGLE ── -->
+        <div class="flex gap-2 mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-1">
+            <button id="catPerfumes" onclick="setCategory('perfumes')"
+                class="flex-1 py-3 md:py-2 rounded-lg bg-[#c5a059] text-black font-bold text-sm transition-all shadow-sm">Perfumes</button>
+            <button id="catVapes" onclick="setCategory('vapes')"
+                class="flex-1 py-3 md:py-2 rounded-lg text-zinc-500 hover:text-white font-bold text-sm transition-all">Vaporizadores</button>
+            <button id="catBarber" onclick="setCategory('barber')"
+                class="flex-1 py-3 md:py-2 rounded-lg text-zinc-500 hover:text-white font-bold text-sm transition-all">Insumos</button>
+        </div>
+
+        <!-- ── FILTROS (solo perfumes) ── -->
+        <div id="perfumeFilters" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+            <div class="md:col-span-1 relative">
+                <input type="text" id="searchInput" placeholder="Buscar perfume o SKU..."
+                    class="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3.5 px-4 pl-10 focus:outline-none focus:ring-1 focus:ring-[#c5a059] text-white text-sm transition-colors">
+                <svg class="absolute left-3 top-3.5 h-4 w-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+            <select id="brandFilter"
+                class="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3.5 px-4 focus:outline-none focus:ring-1 focus:ring-[#c5a059] text-zinc-400 transition-colors text-sm">
+                <option value="all">Todas las Marcas</option>
+                <option value="AFNAN">Afnan</option>
+                <option value="LATTAFA">Lattafa</option>
+                <option value="ARMAF">Armaf</option>
+                <option value="BHARARA">Bharara</option>
+                <option value="AL_HARAMAIN">Al Haramain</option>
+                <option value="OTROS">Otros / Dupes</option>
+            </select>
+            <select id="genderFilter"
+                class="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3.5 px-4 focus:outline-none focus:ring-1 focus:ring-[#c5a059] text-zinc-400 transition-colors text-sm">
+                <option value="all">Género: Todos</option>
+                <option value="H">Hombre (H)</option>
+                <option value="M">Mujer (M)</option>
+                <option value="U">Unisex (U)</option>
+            </select>
+        </div>
+
+        <!-- ── TOOLBAR (contador + toggle vista — solo desktop) ── -->
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-zinc-500 text-xs font-semibold tracking-widest uppercase"><span id="totalItems">0</span> items</span>
+            <div class="flex items-center gap-2">
+                <!-- Botón añadir universal -->
+                <button id="btnAddItem" onclick="addNewItem()" class="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all border border-zinc-700">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    Añadir
+                </button>
+                <!-- View toggle — solo en md+ -->
+                <div class="hidden md:flex bg-zinc-900 border border-zinc-800 rounded-xl p-1 shrink-0">
+                    <button id="btnTableView"
+                        class="px-5 py-2 rounded-lg bg-zinc-800 text-white font-semibold text-sm transition-all shadow-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Tabla
+                    </button>
+                    <button id="btnGalleryView"
+                        class="px-5 py-2 rounded-lg text-zinc-500 hover:text-white font-semibold text-sm transition-all flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        Galería
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Banner cambios sin guardar ── -->
+        <div id="unsavedBanner" class="hidden mb-4 flex items-center justify-between gap-3 bg-amber-950/50 border border-amber-800/50 rounded-xl px-4 py-3">
+            <span class="text-amber-400 text-xs font-bold uppercase tracking-widest">⚠ Cambios sin guardar</span>
+            <button onclick="saveChanges()" class="text-xs bg-amber-500 hover:bg-amber-400 text-black font-black px-4 py-1.5 rounded-lg tracking-widest uppercase transition-all whitespace-nowrap">Guardar</button>
+        </div>
+
+        <!-- ── VISTA MÓVIL: Cards (se muestra en pantallas < md) ── -->
+        <div id="mobileCardList" class="md:hidden space-y-3"></div>
+
+        <!-- ── VISTA DESKTOP: Tabla (controlada por JS con style, no clases Tailwind) ── -->
+        <div id="tableView" style="display:none" class="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden animate-fade-in">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr id="theadRow" class="bg-black text-[10px] uppercase tracking-[0.2em] text-zinc-500 border-b border-zinc-800"></tr>
+                    </thead>
+                    <tbody id="inventoryTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── VISTA GALERÍA (desktop) ── -->
+        <div id="galleryView" style="display:none" class="animate-fade-in">
+            <div id="inventoryGallery" class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- ── MODAL EDITAR ── -->
+    <div id="editModal" class="fixed inset-0 bg-black/90 hidden items-end md:items-center justify-center p-0 md:p-4 z-50 backdrop-blur-sm">
+        <div class="bg-zinc-900 border border-zinc-800 w-full md:max-w-lg overflow-hidden shadow-2xl rounded-t-[28px] md:rounded-[28px]">
+            <!-- Handle para móvil -->
+            <div class="flex justify-center pt-4 pb-2 md:hidden">
+                <div class="w-10 h-1 bg-zinc-700 rounded-full"></div>
+            </div>
+            <div class="p-6 md:p-8">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-lg font-bold text-white tracking-tight">Editar Producto</h3>
+                    <span id="editModalSKU" class="font-mono text-[10px] text-zinc-600 bg-zinc-800 px-2 py-1 rounded"></span>
+                </div>
+                <div class="space-y-4">
+                    <!-- Fija la imagen arriba y la info debajo -->
+                    <div class="flex gap-4 items-start mb-6">
+                        <!-- Preview Imagen -->
+                        <div class="w-24 h-24 shrink-0 bg-black border border-zinc-800 rounded-xl overflow-hidden relative group cursor-pointer" onclick="document.getElementById('editImgFile').click()">
+                            <img id="editImgPreview" src="" class="w-full h-full object-contain" alt="Preview" onerror="this.src='https://via.placeholder.com/300x300/000000/ffffff?text=X'">
+                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="text-[9px] font-bold text-white uppercase tracking-widest text-center px-1">Cambiar<br>Foto</span>
+                            </div>
+                        </div>
+                        <input type="file" id="editImgFile" class="hidden" accept="image/png, image/jpeg, image/webp" onchange="handleImageUpload(event)">
+                        
+                        <!-- Nombre -->
+                        <div class="flex-1">
+                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Nombre del Producto</label>
+                            <input id="editName" type="text" class="w-full bg-black border border-zinc-800 rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:border-[#c5a059] transition-colors">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Costo ($)</label>
+                            <input id="editCost" type="number" inputmode="numeric" class="w-full bg-black border border-zinc-800 rounded-xl py-3.5 px-4 text-white font-mono text-sm focus:outline-none focus:border-[#c5a059] transition-colors">
+                        </div>
+                        <div>
+                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Precio Público ($)</label>
+                            <input id="editPrice" type="number" inputmode="numeric" class="w-full bg-black border border-zinc-800 rounded-xl py-3.5 px-4 text-white font-mono text-sm focus:outline-none focus:border-[#c5a059] transition-colors">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 items-center">
+                        <div>
+                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Stock</label>
+                            <input id="editStock" type="number" min="0" inputmode="numeric" placeholder="Sin límite" class="w-full bg-black border border-zinc-800 rounded-xl py-3.5 px-4 text-white font-mono text-sm focus:outline-none focus:border-[#c5a059] transition-colors">
+                        </div>
+                        <div>
+                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Visible al público</label>
+                            <label class="toggle-switch toggle-switch-lg mt-1">
+                                <input type="checkbox" id="editVisible">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest block mb-1.5">Estado / Etiqueta</label>
+                        <select id="editStatus" class="w-full bg-black border border-zinc-800 rounded-xl py-3.5 px-4 text-white text-sm focus:outline-none focus:border-[#c5a059] transition-colors appearance-none">
+                            <option value="house">🏠 PRODUCTO DE LA CASA</option>
+                            <option value="available">DISPONIBLE (verde)</option>
+                            <option value="unavailable">NO DISPONIBLE (rojo oscuro/gris)</option>
+                            <option value="preorder">DISPONIBLE POR ENCARGUE (celeste)</option>
+                            <option value="out_of_stock">SIN STOCK (rojo)</option>
+                            <option value="low_stock">POCAS UNIDADES (naranja)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row gap-3 mt-8 pb-safe items-center">
+                    <button onclick="saveEditModal()"
+                        class="w-full md:w-auto flex-1 gold-bg text-black font-black py-4 rounded-xl uppercase text-xs tracking-widest hover:opacity-90 transition-opacity order-1 md:order-2">
+                        Guardar
+                    </button>
+                    <button onclick="closeEditModal()"
+                        class="w-full md:w-auto px-6 py-4 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors order-2 md:order-3">
+                        Cancelar
+                    </button>
+                    <button onclick="deleteCurrentItem()"
+                        class="w-full md:w-auto px-6 py-4 text-red-500 hover:text-red-400 hover:bg-red-900/20 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors order-3 md:order-1 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        Borrar Producto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="assets/js/inventory.js"></script>
+    <script src="assets/js/vapes_data.js"></script>
+    <script src="assets/js/barber_data.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+
+</html>

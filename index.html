@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo | BLESSED STORE × BARBERSHOP</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Catálogo exclusivo de perfumería árabe premium, vaporizadores e insumos de barbería. Blessed Store — Montevideo, Uruguay.">
+  <meta name="theme-color" content="#080808">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Blessed Store | Perfumería Árabe Premium">
+  <meta property="og:description" content="Fragancias árabes, vaporizadores e insumos de barbería. Catálogo exclusivo.">
+  <meta property="og:image"       content="assets/img/og_preview.png">
+  <meta property="og:locale"      content="es_UY">
+
+  <!-- Favicon -->
+  <link rel="icon"            type="image/png" href="assets/img/favicon.png">
+  <link rel="apple-touch-icon"                 href="assets/img/favicon.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body class="min-h-screen">
+
+  <!-- Ambient background glow -->
+  <div class="ambient-bg" aria-hidden="true"></div>
+
+  <!-- Toast container -->
+  <div id="toastContainer"></div>
+
+  <div class="relative z-10 max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 pt-6 pb-20">
+
+    <!-- ═══════════════════════════════════════════════ HEADER ═══ -->
+    <header class="flex items-center justify-between mb-8 md:mb-10">
+
+      <!-- LEFT: Hamburger (mobile) + Logo -->
+      <div class="flex items-center gap-4">
+
+        <!-- Hamburger button -->
+        <button id="btnMobileMenu" onclick="toggleMobileMenu()" aria-label="Abrir menú"
+          class="md:hidden flex flex-col gap-[5px] p-2 -ml-2 group">
+          <span class="block w-6 h-[2px] bg-white rounded-full transition-all duration-300 group-hover:bg-[#c5a059]"></span>
+          <span class="block w-4 h-[2px] bg-white/50 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-[#c5a059]/70"></span>
+          <span class="block w-5 h-[2px] bg-white/30 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-[#c5a059]/50"></span>
+        </button>
+
+        <!-- LOGO + Brand -->
+        <div class="flex items-center gap-4">
+          <!-- SVG Logo Mark -->
+          <div id="secretLogoTrigger" onclick="toggleSecretCategory()"
+            class="relative h-14 w-14 md:h-16 md:w-16 rounded-full border-2 gold-border bg-black flex items-center justify-center cursor-pointer shrink-0 shadow-[0_0_20px_rgba(197,160,89,0.15)]">
+            <!-- B letter SVG -->
+            <svg width="28" height="34" viewBox="0 0 28 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 3H16C20.418 3 24 6.582 24 11C24 13.21 23.105 15.21 21.657 16.657C23.696 18.075 25 20.387 25 23C25 27.418 21.418 31 17 31H4V3Z" stroke="#c5a059" stroke-width="1.5" fill="none"/>
+              <path d="M4 3H15C18.866 3 22 6.134 22 10C22 13.866 18.866 17 15 17H4V3Z" fill="rgba(197,160,89,0.08)"/>
+              <path d="M4 17H17C21.418 17 25 20.582 25 25C25 29.418 21.418 33 17 33H4V17Z" fill="rgba(197,160,89,0.06)"/>
+              <line x1="4" y1="17" x2="20" y2="17" stroke="#c5a059" stroke-width="1.2" opacity="0.5"/>
+            </svg>
+            <!-- Orbiting dot -->
+            <span class="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-[#c5a059] border-2 border-[#080808] shadow-[0_0_8px_rgba(197,160,89,0.9)]"></span>
+          </div>
+
+          <!-- Text brand -->
+          <div>
+            <h1 class="text-2xl md:text-3xl font-black tracking-[-0.04em] uppercase text-white leading-none">
+              Blessed<span class="gold-text"> Store</span>
+            </h1>
+            <p class="text-zinc-500 text-[10px] md:text-[11px] mt-0.5 tracking-[0.25em] font-medium uppercase">
+              Perfumería Árabe · Barbershop
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Stats + Admin link -->
+      <div class="hidden md:flex flex-col items-end gap-2">
+        <div class="flex items-baseline gap-2">
+          <span class="text-[#c5a059] font-black font-mono text-3xl leading-none" id="totalItemsDesktop">—</span>
+          <span class="text-zinc-500 text-xs uppercase tracking-[0.2em] font-semibold">en catálogo</span>
+        </div>
+        <a href="login.html" class="text-[9px] text-zinc-700 hover:text-zinc-400 transition-colors uppercase tracking-[0.25em] font-bold">
+          ACCESO ADMIN →
+        </a>
+      </div>
+
+      <!-- RIGHT mobile: item count -->
+      <div class="md:hidden flex items-center gap-2">
+        <div class="text-right">
+          <span class="font-black font-mono text-xl gold-text" id="totalItemsMobile">—</span>
+          <span class="text-[9px] text-zinc-600 uppercase tracking-widest block font-bold" id="itemsLabelMobile">items</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ════════════════════════════════════════ MOBILE MENU OVERLAY ════ -->
+    <div id="mobileMenu" class="fixed inset-0 z-[60] hidden flex-col bg-[#060606]/97 backdrop-blur-2xl">
+      <!-- Top bar -->
+      <div class="flex justify-between items-center px-6 pt-6 pb-5 border-b border-zinc-900">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 gold-border border rounded-full bg-black flex items-center justify-center">
+            <svg width="16" height="20" viewBox="0 0 28 34" fill="none">
+              <path d="M4 3H16C20.418 3 24 6.582 24 11C24 13.21 23.105 15.21 21.657 16.657C23.696 18.075 25 20.387 25 23C25 27.418 21.418 31 17 31H4V3Z" stroke="#c5a059" stroke-width="2" fill="none"/>
+              <line x1="4" y1="17" x2="20" y2="17" stroke="#c5a059" stroke-width="1.5" opacity="0.5"/>
+            </svg>
+          </div>
+          <span class="font-black text-white tracking-wider uppercase text-sm">Blessed Store</span>
+        </div>
+        <button onclick="toggleMobileMenu()" aria-label="Cerrar menú"
+          class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Menu items -->
+      <div class="flex flex-col gap-3 p-6 overflow-y-auto flex-1">
+        <p class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] font-bold mb-1 px-2">Categorías</p>
+
+        <button onclick="selectCategoryMobile('perfumes')"
+          class="mobile-menu-item active flex items-center justify-between bg-zinc-900/40 border border-zinc-800 p-5 rounded-2xl w-full text-left group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center text-xl shrink-0">🌹</div>
+            <div>
+              <p class="text-xl font-black text-white group-[.active]:text-[#c5a059] leading-none">Perfumes</p>
+              <p class="text-zinc-500 text-sm font-medium mt-1">Fragancias Árabes Premium</p>
+            </div>
+          </div>
+          <svg class="w-5 h-5 text-zinc-600 group-[.active]:text-[#c5a059]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+
+        <button onclick="selectCategoryMobile('barber')"
+          class="mobile-menu-item flex items-center justify-between bg-zinc-900/40 border border-zinc-800 p-5 rounded-2xl w-full text-left group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center text-xl shrink-0">✂️</div>
+            <div>
+              <p class="text-xl font-black text-white group-[.active]:text-[#c5a059] leading-none">Insumos</p>
+              <p class="text-zinc-500 text-sm font-medium mt-1">Productos de Barbería</p>
+            </div>
+          </div>
+          <svg class="w-5 h-5 text-zinc-600 group-[.active]:text-[#c5a059]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+
+        <!-- Stats box -->
+        <div class="mt-6 p-5 rounded-2xl border border-zinc-800/50 bg-zinc-900/30">
+          <p class="text-[9px] text-zinc-600 uppercase tracking-[0.25em] font-bold mb-2">Inventario actual</p>
+          <div class="flex items-baseline gap-2">
+            <span class="font-black font-mono text-4xl gold-text" id="totalItemsMobile2">—</span>
+            <span class="text-white font-black text-lg uppercase tracking-widest ml-1" id="itemsLabelMobile2">Items</span>
+          </div>
+        </div>
+
+        <!-- Admin link -->
+        <a href="login.html" class="mt-auto pt-8 text-center text-[10px] text-zinc-700 hover:text-zinc-400 font-bold tracking-[0.3em] uppercase transition-colors block">
+          Acceso Restringido → Admin
+        </a>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ HERO BAND ════ -->
+    <div class="hero-band rounded-2xl px-6 py-4 mb-8 flex items-center justify-between gap-4 overflow-x-auto">
+      <div class="flex items-center gap-6 md:gap-10 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(74,222,128,0.7)] shrink-0"></span>
+          <span class="text-[10px] md:text-xs text-zinc-400 font-semibold uppercase tracking-widest">Atención activa</span>
+        </div>
+        <div class="hidden md:flex items-center gap-2.5">
+          <span class="text-[10px] text-zinc-600 font-semibold uppercase tracking-widest">📍 Montevideo, UY</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span class="text-[10px] text-zinc-600 font-semibold uppercase tracking-widest">🚚 Envíos a todo el país</span>
+        </div>
+      </div>
+      <a href="https://wa.me/59892549474" target="_blank"
+        class="shrink-0 flex items-center gap-2 bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-green-500/20 transition-colors">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+        </svg>
+        Consultar
+      </a>
+    </div>
+
+    <!-- ═══════════════════════════════════ DESKTOP CATEGORY TABS ════ -->
+    <div class="hidden md:flex items-end gap-1 border-b border-zinc-900 mb-8 overflow-x-auto">
+      <button id="catTabPerfumes" onclick="setCategory('perfumes')"
+        class="cat-tab active flex items-center gap-2 mr-6">
+        <span class="text-lg">🌹</span> Perfumes
+      </button>
+      <button id="catTabBarber" onclick="setCategory('barber')"
+        class="cat-tab flex items-center gap-2 mr-6">
+        <span class="text-lg">✂️</span> Insumos de Barbería
+      </button>
+      <button id="catTabVapes" onclick="toggleSecretCategory()"
+        class="cat-tab hidden items-center gap-2">
+        <span class="text-lg">💨</span> Vaporizadores
+      </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════ SEARCH & FILTERS ════ -->
+    <div id="perfumeFilters" class="mb-8">
+      <div class="search-bar flex flex-wrap md:flex-nowrap items-center gap-3 p-2 pl-4">
+        <!-- Search -->
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <svg class="w-5 h-5 text-zinc-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Buscar fragancia o marca..."
+            class="bg-transparent border-none outline-none text-white text-sm md:text-base font-medium placeholder:text-zinc-600 w-full min-w-0">
+        </div>
+
+        <!-- Divider -->
+        <span class="hidden md:block w-px h-6 bg-zinc-800 shrink-0"></span>
+
+        <!-- Brand filter -->
+        <select id="brandFilter"
+          class="bg-transparent border-none outline-none text-zinc-300 text-sm font-semibold appearance-none cursor-pointer px-2 py-3 md:py-2">
+          <option value="all">💎 Todas las casas</option>
+          <option value="AFNAN">Afnan</option>
+          <option value="LATTAFA">Lattafa</option>
+          <option value="ARMAF">Armaf</option>
+          <option value="BHARARA">Bharara</option>
+          <option value="AL_HARAMAIN">Al Haramain</option>
+          <option value="OTROS">Otras</option>
+        </select>
+
+        <!-- Divider -->
+        <span class="hidden md:block w-px h-6 bg-zinc-800 shrink-0"></span>
+
+        <!-- Gender filter -->
+        <select id="genderFilter"
+          class="bg-transparent border-none outline-none text-zinc-300 text-sm font-semibold appearance-none cursor-pointer px-2 py-3 md:py-2 md:pr-4">
+          <option value="all">✨ Todos</option>
+          <option value="H">👔 Masculino</option>
+          <option value="M">🌸 Femenino</option>
+          <option value="U">⚡ Unisex</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ PRODUCT GRID ════ -->
+    <div id="galleryView" class="animate-fade-in pb-16">
+      <div id="inventoryGallery"
+        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
+        <!-- Products injected by public.js -->
+        <div class="col-span-full flex items-center justify-center py-24 text-zinc-700">
+          <div class="text-center animate-fade-in-up">
+            <div class="w-12 h-12 border-2 border-zinc-800 rounded-full border-t-[#c5a059] animate-spin mx-auto mb-4"></div>
+            <p class="text-sm font-semibold uppercase tracking-widest">Cargando catálogo...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /wrapper -->
+
+  <!-- ═══════════════════════════════════════ PRODUCT DETAIL MODAL ════ -->
+  <div id="infoModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50 backdrop-blur-lg">
+    <div class="modal-inner rounded-[28px] max-w-xl w-full overflow-hidden shadow-2xl animate-scale-in relative"
+      onclick="event.stopPropagation()">
+
+      <!-- Close button -->
+      <button onclick="closeModal()" aria-label="Cerrar"
+        class="absolute top-5 right-5 z-20 w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-600 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <div class="grid grid-cols-1 md:grid-cols-2">
+        <!-- Image side -->
+        <div class="h-64 md:h-auto bg-black flex items-center justify-center p-10 relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-[#c5a059]/5 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <img id="mImg" src="" alt="Producto"
+            class="max-h-full max-w-full object-contain relative z-10 drop-shadow-[0_10px_40px_rgba(197,160,89,0.15)] transition-transform duration-700 hover:scale-105">
+        </div>
+
+        <!-- Info side -->
+        <div class="p-8 flex flex-col justify-between">
+          <div>
+            <p id="modalBrand" class="text-[#c5a059] text-[10px] font-black uppercase tracking-[0.3em] mb-3"></p>
+            <h2 id="modalTitle" class="text-2xl md:text-3xl font-black text-white leading-tight mb-6"></h2>
+            <div class="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/50 mb-8">
+              <span class="block text-zinc-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1">Precio al público</span>
+              <span class="text-3xl font-black font-mono text-white">$ <span id="mFinal"></span></span>
+            </div>
+          </div>
+
+          <a id="btnBuyWA" href="#" target="_blank" rel="noopener noreferrer"
+            class="btn-gold w-full flex items-center justify-center gap-3 py-5 rounded-[18px] uppercase text-sm tracking-widest shadow-xl shadow-[#c5a059]/20">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+            </svg>
+            Pedir por WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Click outside closes -->
+    <div class="absolute inset-0 -z-10" onclick="closeModal()"></div>
+  </div>
+
+  <!-- ════════════════════════════════════ AGE VERIFICATION MODAL ════ -->
+  <div id="ageModal" class="hidden fixed inset-0 z-[60] bg-black/95 backdrop-blur-2xl items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl scale-95 transition-transform duration-300 transform">
+      <div class="p-8 text-center">
+        <div class="w-20 h-20 bg-red-900/20 border border-red-900/40 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="text-red-500 font-black text-3xl leading-none">+18</span>
+        </div>
+        <h3 class="text-2xl font-black text-white mb-3 tracking-tight">Verificación de Edad</h3>
+        <p class="text-zinc-400 text-sm mb-8 leading-relaxed">
+          Los vaporizadores y productos relacionados son exclusivos para mayores de edad. Al ingresar confirmás que tenés 18 años o más.
+        </p>
+        <div class="space-y-3">
+          <button onclick="acceptAgeWarning()"
+            class="btn-gold w-full py-4 rounded-xl uppercase text-sm tracking-widest">
+            Sí, tengo más de 18 años
+          </button>
+          <button onclick="declineAgeWarning()"
+            class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl uppercase text-sm tracking-widest transition-all">
+            No, regresar
+          </button>
+        </div>
+        <p class="text-zinc-700 text-[10px] mt-5 leading-relaxed">
+          Esta verificación es requerida en cumplimiento con la normativa vigente. No almacenamos tu respuesta.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/inventory.js" defer></script>
+  <script src="assets/js/vapes_data.js" defer></script>
+  <script src="assets/js/barber_data.js" defer></script>
+  <script src="assets/js/public.js" defer></script>
+</body>
+</html>
