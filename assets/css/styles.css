@@ -32,7 +32,17 @@ body {
   margin: 0;
 }
 
-* { -webkit-tap-highlight-color: transparent; }
+* { 
+  -webkit-tap-highlight-color: transparent; 
+  touch-action: manipulation;
+}
+
+/* Prevent iOS Safari auto-zoom on focus */
+@media screen and (max-width: 768px) {
+  input, select, textarea, .admin-input {
+    font-size: 16px !important;
+  }
+}
 
 button:active, .product-card:active {
   transform: scale(0.96);
