@@ -3,8 +3,14 @@
   functions = "netlify/functions"
   edge_functions = "netlify/edge-functions"
 
-# Protección del panel admin
-# ── Regla 1: Si el usuario TIENE el rol "admin" → dejar pasar (sirve el archivo)
+# ── Regla 1: Si el usuario TIENE el rol "admin" → dejar pasar
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+  force = true
+  conditions = {Role = ["admin"]}
+
 [[redirects]]
   from = "/admin.html"
   to = "/admin.html"
@@ -12,7 +18,18 @@
   force = true
   conditions = {Role = ["admin"]}
 
-# ── Regla 2: Si NO tiene el rol → redirigir al login
+# ── Regla 2: Si NO tiene el rol o accede a /login
+[[redirects]]
+  from = "/login"
+  to = "/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/login.html"
+  status = 302
+  force = true
+
 [[redirects]]
   from = "/admin.html"
   to = "/login.html"

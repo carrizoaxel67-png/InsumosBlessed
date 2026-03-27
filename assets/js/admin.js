@@ -248,17 +248,22 @@ function renderPerfumes() {
 function buildPerfumeRow(p) {
     const tr = document.createElement('tr');
     tr.className = `border-b border-zinc-800 transition-all group ${!p.visible ? 'hidden-product' : ''}`;
+    
+    // Safety calculations
+    const costVal = typeof p.cost === 'number' ? p.cost : 0;
+    const priceVal = typeof p.price === 'number' ? p.price : (costVal + 500);
+
     tr.innerHTML = `
-        <td class="px-4 py-3 font-mono text-[10px] gold-text opacity-40">${p.id}</td>
+        <td class="px-4 py-3 font-mono text-[10px] gold-text opacity-40">${p.id || '---'}</td>
         <td class="px-4 py-3"><div class="h-9 w-9 bg-black rounded-lg border border-zinc-800 flex items-center justify-center overflow-hidden relative">
-            <img src="${p.img}" loading="lazy" decoding="async" class="w-full h-full object-contain absolute inset-0 m-auto" alt="${p.name}" onerror="this.style.display='none'">
+            <img src="${p.img || ''}" loading="lazy" decoding="async" class="w-full h-full object-contain absolute inset-0 m-auto" alt="${p.name || ''}" onerror="this.style.display='none'">
         </div></td>
         <td class="px-4 py-3"><div class="text-white font-semibold text-sm line-clamp-1">${p.name || 'Sin nombre'}</div>
-            <div class="text-[9px] text-zinc-600 uppercase tracking-widest leading-none mt-1 flex items-center gap-2">${(p.brand || 'GENERICO').replace('_', ' ')} ${getAdminStatusBadge(p)}</div></td>
-        <td class="px-4 py-3"><span class="text-[9px] font-bold border px-1.5 py-0.5 rounded ${getGenClass(p.gen)}">${p.gen}</span></td>
-        <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${p.cost.toLocaleString()}</td>
+            <div class="text-[9px] text-zinc-600 uppercase tracking-widest leading-none mt-1 flex items-center gap-2">${(p.brand || 'GENÉRICO').replace('_', ' ')} ${getAdminStatusBadge(p)}</div></td>
+        <td class="px-4 py-3"><span class="text-[9px] font-bold border px-1.5 py-0.5 rounded ${getGenClass(p.gen)}">${p.gen || 'U'}</span></td>
+        <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${costVal.toLocaleString()}</td>
         <td class="px-4 py-3 text-right">
-            <input type="number" class="inline-input" value="${p.price}"
+            <input type="number" class="inline-input" value="${priceVal}"
                 onchange="updateField('perfumes','${p.id}','price',+this.value)" onclick="this.select()">
         </td>
         <td class="px-4 py-3 text-center">
@@ -306,22 +311,26 @@ function renderVapes() {
 function buildVapeRow(v) {
     const tr = document.createElement('tr');
     tr.className = `border-b border-zinc-800 transition-all group ${!v.visible ? 'hidden-product' : ''}`;
+    
+    const costVal = typeof v.cost === 'number' ? v.cost : 0;
+    const priceVal = typeof v.price === 'number' ? v.price : (costVal + 500);
+
     tr.innerHTML = `
-        <td class="px-4 py-3 font-mono text-[10px] gold-text opacity-40">${v.id}</td>
+        <td class="px-4 py-3 font-mono text-[10px] gold-text opacity-40">${v.id || '---'}</td>
         <td class="px-4 py-3"><div class="h-9 w-9 bg-black rounded-lg border border-zinc-800 overflow-hidden relative">
-            <img src="${v.img}" loading="lazy" decoding="async" class="w-full h-full object-cover absolute inset-0" alt="${v.name}" onerror="this.style.display='none'">
+            <img src="${v.img || ''}" loading="lazy" decoding="async" class="w-full h-full object-cover absolute inset-0" alt="${v.name || ''}" onerror="this.style.display='none'">
         </div></td>
-        <td class="px-4 py-3"><div class="text-white font-semibold text-sm line-clamp-1">${v.name}</div>
-            <div class="text-[9px] text-zinc-600 uppercase tracking-widest leading-none mt-1 flex items-center gap-2">${v.brand} ${getAdminStatusBadge(v)}</div></td>
-        <td class="px-4 py-3"><span class="text-[9px] font-bold border border-green-900/50 text-green-500 bg-green-900/10 px-1.5 py-0.5 rounded tracking-widest">${v.puffs}</span></td>
-        <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${v.cost.toLocaleString()}</td>
+        <td class="px-4 py-3"><div class="text-white font-semibold text-sm line-clamp-1">${v.name || 'Sin nombre'}</div>
+            <div class="text-[9px] text-zinc-600 uppercase tracking-widest leading-none mt-1 flex items-center gap-2">${v.brand || 'GENÉRICO'} ${getAdminStatusBadge(v)}</div></td>
+        <td class="px-4 py-3"><span class="text-[9px] font-bold border border-green-900/50 text-green-500 bg-green-900/10 px-1.5 py-0.5 rounded tracking-widest">${v.puffs || '0'} PUFFS</span></td>
+        <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${costVal.toLocaleString()}</td>
         <td class="px-4 py-3 text-right">
-            <input type="number" class="inline-input" value="${v.price}"
+            <input type="number" class="inline-input" value="${priceVal}"
                 onchange="updateField('vapes','${v.id}','price',+this.value)" onclick="this.select()">
         </td>
         <td class="px-4 py-3 text-center">
-            <input type="number" min="0" class="stock-input" value="${v.stock ?? 0}"
-                onchange="updateField('vapes','${v.id}','stock',+this.value)" onclick="this.select()">
+            <input type="number" min="0" class="stock-input" value="${v.stock ?? ''}" placeholder="∞"
+                onchange="updateField('vapes','${v.id}','stock', this.value===''?null:+this.value)" onclick="this.select()">
         </td>
         <td class="px-4 py-3 text-center">
             <label class="toggle-switch">
@@ -364,17 +373,21 @@ function renderBarber() {
 function buildBarberRow(b) {
     const tr = document.createElement('tr');
     tr.className = `border-b border-zinc-800 transition-all group ${!b.visible ? 'hidden-product' : ''}`;
+    
+    const costVal = typeof b.cost === 'number' ? b.cost : 0;
+    const priceVal = typeof b.price === 'number' ? b.price : (costVal + 500);
+
     tr.innerHTML = `
-        <td class="px-4 py-3 font-mono text-[10px] gold-text opacity-40">${b.id}</td>
+        <td class="px-4 py-3 font-mono text-[10px] gold-text opacity-40">${b.id || '---'}</td>
         <td class="px-4 py-3"><div class="h-9 w-9 bg-black rounded-lg border border-zinc-800 overflow-hidden relative">
-            <img src="${b.img}" loading="lazy" decoding="async" class="w-full h-full object-cover absolute inset-0" alt="${b.name}" onerror="this.style.display='none'">
+            <img src="${b.img || ''}" loading="lazy" decoding="async" class="w-full h-full object-cover absolute inset-0" alt="${b.name || ''}" onerror="this.style.display='none'">
         </div></td>
-        <td class="px-4 py-3"><div class="text-white font-semibold text-sm line-clamp-1">${b.name}</div>
+        <td class="px-4 py-3"><div class="text-white font-semibold text-sm line-clamp-1">${b.name || 'Sin nombre'}</div>
             <div class="text-[9px] text-zinc-600 uppercase tracking-widest leading-none mt-1 flex items-center gap-2">${b.description || ''} ${getAdminStatusBadge(b)}</div></td>
-        <td class="px-4 py-3 text-zinc-400 text-xs">${b.brand}</td>
-        <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${(b.cost||0).toLocaleString()}</td>
+        <td class="px-4 py-3 text-zinc-400 text-xs">${b.brand || '---'}</td>
+        <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${costVal.toLocaleString()}</td>
         <td class="px-4 py-3 text-right">
-            <input type="number" class="inline-input" value="${b.price}"
+            <input type="number" class="inline-input" value="${priceVal}"
                 onchange="updateField('barber','${b.id}','price',+this.value)" onclick="this.select()">
         </td>
         <td class="px-4 py-3 text-center">
@@ -454,11 +467,11 @@ function renderMobileCards(items, category) {
                         ${getAdminStatusBadge(item)}
                         ${isHidden ? `<span class="text-[9px] font-bold text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded uppercase">oculto</span>` : ''}
                     </div>
-                    <p class="text-white font-semibold text-sm leading-tight truncate">${item.name}</p>
-                    <p class="text-zinc-600 text-[10px] uppercase tracking-widest font-semibold mt-0.5">${item.brand}</p>
+                    <p class="text-white font-semibold text-sm leading-tight truncate">${item.name || 'Sin nombre'}</p>
+                    <p class="text-zinc-600 text-[10px] uppercase tracking-widest font-semibold mt-0.5">${item.brand || 'GENÉRICO'}</p>
                 </div>
                 <div class="shrink-0 flex flex-col items-end gap-2">
-                    <span class="text-[#c5a059] font-black font-mono text-base leading-none">$${item.price.toLocaleString()}</span>
+                    <span class="text-[#c5a059] font-black font-mono text-base leading-none">$${(item.price || 0).toLocaleString()}</span>
                     <button onclick="openEditModal('${category}','${item.id}')"
                         class="flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-[#c5a059] border border-zinc-800 hover:border-[#c5a059]/50 px-3 py-1.5 rounded-lg transition-all">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
