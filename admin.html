@@ -333,7 +333,7 @@
             
             <div class="flex flex-wrap items-center gap-3">
                 <!-- Weather Widget (San José de Mayo) -->
-                <div id="weatherWidget" class="hidden md:flex items-center gap-3 bg-[rgba(15,15,15,0.8)] border border-[rgba(255,255,255,0.07)] px-4 py-2 rounded-xl backdrop-blur-md">
+                <div id="weatherWidget" class="flex items-center gap-3 bg-[rgba(15,15,15,0.8)] border border-[rgba(255,255,255,0.07)] px-4 py-2 rounded-xl backdrop-blur-md">
                     <div class="w-8 h-8 rounded-full bg-black border border-zinc-800 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     </div>
@@ -343,20 +343,16 @@
                     </div>
                 </div>
 
-                <button id="btnSave" onclick="saveChanges()" class="btn-gold flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest hidden md:flex">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    Guardar Cambios
-                </button>
-            </div>
-        </div>
-                <button id="btnSave" onclick="saveChanges()" class="btn-gold hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    Guardar
-                </button>
-                <button onclick="addNewItem()" class="hidden md:flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white py-2.5 px-5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    Nuevo Producto
-                </button>
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
+                    <button id="btnSave" onclick="saveChanges()" class="btn-gold hidden md:flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-widest">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        Guardar Cambios
+                    </button>
+                    <button onclick="addNewItem()" class="hidden md:flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white py-2.5 px-5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all">
+                        <span class="text-lg leading-none font-light -mt-0.5">+</span>
+                        NUEVO PRODUCTO
+                    </button>
+                </div>
             </div>
         </div>
 
