@@ -13,18 +13,30 @@ async function init() {
     setupListeners();
     initViews();
     render();
-    fetchWeather();
+    fetchWeatherAndCurrency();
 }
 
-async function fetchWeather() {
+async function fetchWeatherAndCurrency() {
     try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.3375&longitude=-56.7136&current_weather=true');
-        const data = await res.json();
-        const temp = data.current_weather.temperature;
+        const resW = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.3375&longitude=-56.7136&current_weather=true');
+        const dataW = await resW.json();
+        const temp = Math.round(dataW.current_weather.temperature);
+        const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+        const hoy = dias[new Date().getDay()];
         const el = document.getElementById('weatherTemp');
-        if (el) el.textContent = temp + '°C';
+        if (el) el.innerHTML = `${temp}°C <span class="text-[10px] text-zinc-500 uppercase tracking-widest ml-1 font-bold">${hoy}</span>`;
     } catch(e) {
         console.warn('Weather error', e);
+    }
+
+    try {
+        const resU = await fetch('https://open.er-api.com/v6/latest/USD');
+        const dataU = await resU.json();
+        const uyu = dataU.rates.UYU.toFixed(2);
+        const elU = document.getElementById('widgetUSD');
+        if (elU) elU.innerText = `$${uyu}`;
+    } catch(e) {
+        console.warn('Currency error', e);
     }
 }
 
@@ -239,7 +251,7 @@ function buildPerfumeRow(p) {
         <td class="px-4 py-3"><span class="text-[9px] font-bold border px-1.5 py-0.5 rounded ${getGenClass(p.gen)}">${p.gen}</span></td>
         <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${p.cost.toLocaleString()}</td>
         <td class="px-4 py-3 text-right">
-            <input type="number" class="edit-input" value="${p.price}"
+            <input type="number" class="inline-input" value="${p.price}"
                 onchange="updateField('perfumes','${p.id}','price',+this.value)" onclick="this.select()">
         </td>
         <td class="px-4 py-3 text-center">
@@ -297,7 +309,7 @@ function buildVapeRow(v) {
         <td class="px-4 py-3"><span class="text-[9px] font-bold border border-green-900/50 text-green-500 bg-green-900/10 px-1.5 py-0.5 rounded tracking-widest">${v.puffs}</span></td>
         <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${v.cost.toLocaleString()}</td>
         <td class="px-4 py-3 text-right">
-            <input type="number" class="edit-input" value="${v.price}"
+            <input type="number" class="inline-input" value="${v.price}"
                 onchange="updateField('vapes','${v.id}','price',+this.value)" onclick="this.select()">
         </td>
         <td class="px-4 py-3 text-center">
@@ -355,7 +367,7 @@ function buildBarberRow(b) {
         <td class="px-4 py-3 text-zinc-400 text-xs">${b.brand}</td>
         <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${(b.cost||0).toLocaleString()}</td>
         <td class="px-4 py-3 text-right">
-            <input type="number" class="edit-input" value="${b.price}"
+            <input type="number" class="inline-input" value="${b.price}"
                 onchange="updateField('barber','${b.id}','price',+this.value)" onclick="this.select()">
         </td>
         <td class="px-4 py-3 text-center">
