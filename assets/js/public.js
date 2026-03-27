@@ -4,6 +4,8 @@ let publicVapes = [];
 let publicBarber = [];
 
 const searchInput = document.getElementById('searchInput');
+let customStatuses = JSON.parse(localStorage.getItem('blessed_statuses') || '[]');
+
 const brandFilter = document.getElementById('brandFilter');
 const genderFilter = document.getElementById('genderFilter');
 const inventoryGallery = document.getElementById('inventoryGallery');
@@ -341,6 +343,28 @@ function getStatusTag(item) {
 
     if (!label) return '';
     return `<span class="absolute inset-0 bg-black/40 flex items-center justify-center z-20 pointer-events-none"><span class="text-[10px] md:text-xs font-black tracking-widest uppercase px-3 py-1.5 rounded-lg shadow-xl ${classes}">${label}</span></span>`;
+}
+
+function getStatusBadge(status) {
+    if (!status || status === 'available') return '';
+    
+    // Check custom statuses
+    const custom = customStatuses.find(s => s.id === status || s.label === status);
+    if (custom) {
+        return `<span class="dynamic-badge" style="background-color: ${custom.color}; color: ${custom.textColor}">${custom.label}</span>`;
+    }
+
+    const config = {
+        'low_stock': { label: 'Pocas Unidades', class: 'bg-orange-500/10 text-orange-500 border-orange-500/20' },
+        'out_of_stock': { label: 'Sin Stock', class: 'bg-red-500/10 text-red-500 border-red-500/20' },
+        'house': { label: 'De la Casa', class: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
+        'preorder': { label: 'Por Encargue', class: 'bg-blue-500/10 text-blue-500 border-blue-500/20' }
+    };
+
+    const c = config[status];
+    if (!c) return `<span class="bg-zinc-800 text-zinc-400 border border-zinc-700 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">${status.toUpperCase()}</span>`;
+
+    return `<span class="${c.class} border px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">${c.label}</span>`;
 }
 
 function updateCounters(count, label) {

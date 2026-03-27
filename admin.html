@@ -283,17 +283,9 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
             Categorías
         </div>
-        <div class="nav-item" id="navCalculadora" onclick="switchSection('calculadora')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            Calculadora
-        </div>
-        <div class="nav-item" id="navReservas" onclick="switchSection('reservas')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            Reservas
-        </div>
-        <div class="nav-item" id="navReviews" onclick="switchSection('reviews')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-            Testimonios
+        <div class="nav-item" id="navEstados" onclick="switchSection('estados')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+            Estados de Producto
         </div>
 
         <p class="text-zinc-700 text-[9px] font-bold uppercase tracking-[0.3em] px-5 mb-2 mt-6">Divisas</p>
@@ -329,8 +321,8 @@
         <!-- Header & Weather -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 mt-10 md:mt-0">
             <div>
-                <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">CPanel Operativo</h1>
-                <p class="text-zinc-500 text-sm mt-1">Gestión integral del ecosistema comercial.</p>
+                <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Panel de Control</h1>
+                <p class="text-zinc-500 text-sm mt-1">Versión resumida de tu inventario operativo.</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
@@ -450,26 +442,79 @@
             <p class="text-lg font-bold tracking-widest uppercase mb-1">Inventario Vacío</p>
             <p class="text-sm text-zinc-600">Agregá tu primer producto para empezar a vender.</p>
         </div>
+
+        <!-- ACTION BANNER (Manage All) -->
+        <div id="manageAllBanner" class="mt-8 text-center bg-zinc-900/40 border border-zinc-800 p-8 rounded-[28px] border-dashed">
+            <p class="text-zinc-500 text-sm mb-4">Estas viendo una selección de productos destacados.</p>
+            <button onclick="enableFullCatalogue()" class="btn-gold px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl">
+                Gestionar Catálogo Completo
+            </button>
+        </div>
+
+    </section>
+
+    <!-- ══ SECCIÓN: ESTADOS DE PRODUCTO ══ -->
+    <section id="sectionEstados" class="hidden p-6 md:p-8 fade-up">
+        <div class="mb-8">
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Estados de Producto</h1>
+            <p class="text-zinc-500 text-sm mt-1">Personaliza las etiquetas y carteles que aparecen sobre los productos.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-[#0c0c0c] border border-zinc-800 rounded-[28px] p-6 shadow-xl">
+                <p class="text-zinc-300 font-bold mb-4">Nuevo Estado</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-black block mb-2">Nombre del Estado (Ej: Últimas unidades)</label>
+                        <input type="text" id="newStateLabel" placeholder="Escribe el nombre..." class="admin-input">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-black block mb-2">Color del Fondo</label>
+                            <div class="flex items-center gap-3 bg-black/40 p-2 rounded-xl border border-zinc-800">
+                                <input type="color" id="newStateColor" value="#d4af37" class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-none">
+                                <span class="text-xs text-zinc-400 font-mono" id="colorHexText">#d4af37</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-black block mb-2">Color de Letra</label>
+                            <select id="newStateTextColor" class="admin-input">
+                                <option value="#ffffff">Blanco</option>
+                                <option value="#000000">Negro</option>
+                                <option value="#c5a059">Dorado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="addNewStatus()" class="btn-gold w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest mt-4">Crear Estado</button>
+                </div>
+            </div>
+
+            <div class="space-y-4" id="statusListContainer">
+                <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-black">Estados Activos</p>
+                <!-- Dynamic States -->
+            </div>
+        </div>
     </section>
 
     <!-- ══ SECCIÓN: CATEGORÍAS ══ -->
     <section id="sectionCategorias" class="hidden p-6 md:p-8 fade-up">
-        <div class="mb-8 mt-10 md:mt-0">
-            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Categorías</h1>
-            <p class="text-zinc-500 text-sm mt-1">Agregá o eliminá colecciones del catálogo.</p>
+        <div class="mb-8">
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Gestor de Categorías</h1>
+            <p class="text-zinc-500 text-sm mt-1">Añadí o eliminá categorías para el catálogo (Perfumes, Insumos, etc).</p>
         </div>
-        <div class="max-w-lg">
-            <div class="flex gap-3 mb-6">
-                <input type="text" id="newCategoryInput" placeholder="Ej: Ropa Interior Premium" class="admin-input" onkeydown="if(event.key==='Enter') addCategory()">
-                <button onclick="addCategory()" class="btn-gold px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest whitespace-nowrap">Agregar</button>
-            </div>
-            <div id="categoryList" class="space-y-3">
-                <p class="text-zinc-600 text-sm text-center py-8">No hay categorías personalizadas aún.</p>
+
+        <div class="max-w-md bg-[#0c0c0c] border border-zinc-800 rounded-[28px] p-6 shadow-xl mb-8">
+            <p class="text-zinc-300 font-bold mb-4 italic">Añadir nueva categoría</p>
+            <div class="flex gap-2">
+                <input type="text" id="newCategoryInput" placeholder="Ej: Perfumes Árabes..." class="admin-input">
+                <button onclick="addCategory()" class="btn-gold px-6 rounded-xl text-xs font-black uppercase tracking-widest">Añadir</button>
             </div>
         </div>
+
+        <div id="categoryList" class="flex flex-wrap gap-4"></div>
     </section>
 
-    <!-- ══ SECCIÓN: CALCULADORA ══ -->
+    <!-- ══ SECCIÓN: CALCULADORA COMERCIAL ══ -->
     <section id="sectionCalculadora" class="hidden p-6 md:p-8 fade-up">
         <div class="mb-8 mt-10 md:mt-0">
             <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Máquina de Rentabilidad</h1>
@@ -765,12 +810,12 @@
 <script>
 // ── SIDEBAR / SECTIONS ──────────────────────────────────────────────────────
 function switchSection(name) {
-    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas'];
+    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas','Estados'];
     sections.forEach(s => {
         const el = document.getElementById('section' + s);
         if (el) el.classList.toggle('hidden', s.toLowerCase() !== name);
     });
-    const navMap = { catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora', reviews:'navReviews', divisas:'navDivisas', reservas:'navReservas' };
+    const navMap = { catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora', reviews:'navReviews', divisas:'navDivisas', reservas:'navReservas', estados:'navEstados' };
     Object.entries(navMap).forEach(([k,id]) => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('active', k === name);

@@ -2,9 +2,22 @@
 let currentCategory = 'perfumes';
 let currentView = 'table';
 let hasUnsavedChanges = false;
-let workingPerfumes = [];
-let workingVapes = [];
-let workingBarber = [];
+let workingPerfumes = [...perfumes];
+let workingVapes = [...vapes];
+let workingBarber = [...barber];
+
+let isFullCatalogue = false; // Summarization state
+let customStatuses = JSON.parse(localStorage.getItem('blessed_statuses') || '[]');
+
+// Default fallback statuses if none exist
+if (!customStatuses.length) {
+    customStatuses = [
+        { id: 'st1', label: 'Últimas unidades', color: '#ef4444', textColor: '#ffffff' },
+        { id: 'st2', label: 'Disponible por encargue', color: '#3b82f6', textColor: '#ffffff' },
+        { id: 'st3', label: 'Sin stock', color: '#71717a', textColor: '#ffffff' }
+    ];
+    localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
+}
 let editingId = null;
 
 // ─── INICIALIZACIÓN ─────────────────────────────────────────────────────────
@@ -300,7 +313,12 @@ function renderVapes() {
     tableBody.innerHTML = '';
     if (gallery) gallery.innerHTML = '';
 
-    workingVapes.forEach(v => {
+    // Summarization logic
+    const itemsToShow = isFullCatalogue ? workingVapes : workingVapes.slice(0, 3);
+    document.getElementById('manageAllBanner').classList.toggle('hidden', isFullCatalogue || workingVapes.length <= 3);
+    document.getElementById('fullCatalogueAlert').classList.toggle('hidden', !isFullCatalogue);
+
+    itemsToShow.forEach(v => {
         tableBody.appendChild(buildVapeRow(v));
         if (gallery) gallery.appendChild(buildGalleryCard(v, 'vapes'));
     });
@@ -575,6 +593,17 @@ function openEditModal(category, id) {
     document.getElementById('editImgPreview').src = item.img || 'https://via.placeholder.com/300x300/111111/c5a059?text=Nuevo';
     document.getElementById('editImgFile').value = '';
 
+    // Populate Status Select dynamically
+    const statusSelect = document.getElementById('editStatus');
+    if (statusSelect) {
+        statusSelect.innerHTML = customStatuses.map(st => `<option value="${st.id}">${st.label}</option>`).join('');
+        // Add legacy if not found
+        if (item.status && !customStatuses.find(st => st.id === item.status)) {
+            statusSelect.innerHTML += `<option value="${item.status}">${item.status}</option>`;
+        }
+        statusSelect.value = item.status || 'available';
+    }
+    
     const brandEl = document.getElementById('editBrand');
     if (brandEl) brandEl.value = item.brand || '';
     
@@ -613,10 +642,11 @@ function saveEditModal() {
     const sv = document.getElementById('editStock').value;
     item.stock = sv === '' ? null : +sv;
     item.visible = document.getElementById('editVisible').checked;
-    item.status = document.getElementById('editStatus').value;
+    const statusEl = document.getElementById('editStatus');
+    if (statusEl) item.status = statusEl.value;
     
     const brandEl = document.getElementById('editBrand');
-    if (brandEl) item.brand = brandEl.value.trim().toUpperCase() || 'GENERICO';
+    if (brandEl) item.brand = brandEl.value.trim() || 'GENERICO';
     
     const descEl = document.getElementById('editDescription');
     if (descEl) item.description = descEl.value.trim();
@@ -744,20 +774,30 @@ function getAdminStatusBadge(item) {
     let st = item.status || 'available';
     if (st === 'available' && item.stock !== null && item.stock !== undefined && item.stock <= 0) st = 'out_of_stock';
     
-    if (st === 'available') return '';
+    // Check if it matches a custom status id
+    const custom = customStatuses.find(s => s.id === st);
     
+    if (custom) {
+        return `<span class="px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter" style="background-color: ${custom.color}; color: ${custom.textColor}">${custom.label}</span>`;
+    }
+
+    // Fallbacks for legacy/default statuses
     let label = '';
     let classes = '';
 
     switch(st) {
+        case 'available': return ''; // No badge for available
         case 'house': label = 'DE LA CASA'; classes = 'border-purple-500/50 text-purple-400 bg-purple-900/30'; break;
         case 'unavailable': label = 'NO DISP.'; classes = 'border-zinc-700 text-zinc-400 bg-zinc-900/50'; break;
         case 'preorder': label = 'ENCARGUE'; classes = 'border-cyan-500/50 text-cyan-400 bg-cyan-900/30'; break;
         case 'out_of_stock': label = 'SIN STOCK'; classes = 'border-red-500/50 text-red-500 bg-red-900/30'; break;
         case 'low_stock': label = 'POCAS U.'; classes = 'border-orange-500/50 text-orange-400 bg-orange-900/30'; break;
+        default: // For any other unrecognized status, display it as a generic badge
+            label = st.toUpperCase();
+            classes = 'bg-zinc-800 text-zinc-500 border border-zinc-700';
+            break;
     }
     
-    if (!label) return '';
     return `<span class="text-[8px] font-bold border px-1.5 py-0.5 rounded tracking-widest uppercase ${classes}">${label}</span>`;
 }
 
@@ -859,6 +899,84 @@ function runSimpleCalc(n) {
         // Keep previous result or show error? Silent is better for UX
     }
 }
+
+// ─── GESTIÓN DE ESTADOS (BADGES) ─────────────────────────────────────────────
+function renderStatusList() {
+    const container = document.getElementById('statusListContainer');
+    if (!container) return;
+
+    // Clear but keep header
+    const header = container.querySelector('p');
+    container.innerHTML = '';
+    if (header) container.appendChild(header);
+
+    customStatuses.forEach(st => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl group';
+        div.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="w-4 h-4 rounded-full" style="background-color: ${st.color}"></div>
+                <div>
+                    <p class="text-sm font-bold text-white">${st.label}</p>
+                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest">ID: ${st.id}</p>
+                </div>
+            </div>
+            <button onclick="removeStatus('${st.id}')" class="opacity-0 group-hover:opacity-100 p-2 text-zinc-600 hover:text-red-500 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function addNewStatus() {
+    const label = document.getElementById('newStateLabel').value.trim();
+    const color = document.getElementById('newStateColor').value;
+    const textColor = document.getElementById('newStateTextColor').value;
+
+    if (!label) { showToast('Escribe un nombre para el estado', 'error'); return; }
+
+    const newSt = {
+        id: 'st_' + Date.now(),
+        label,
+        color,
+        textColor
+    };
+
+    customStatuses.push(newSt);
+    localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
+    document.getElementById('newStateLabel').value = '';
+    renderStatusList();
+    showToast('✓ Estado creado correctamente', 'success');
+}
+
+function removeStatus(id) {
+    customStatuses = customStatuses.filter(st => st.id !== id);
+    localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
+    renderStatusList();
+    showToast('Estado eliminado', 'success');
+}
+
+function getAdminStatusBadge(statusValue) {
+    // Check if it matches a custom status label or id
+    const custom = customStatuses.find(st => st.label === statusValue || st.id === statusValue);
+    
+    if (custom) {
+        return `<span class="px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter" style="background-color: ${custom.color}; color: ${custom.textColor}">${custom.label}</span>`;
+    }
+
+    // Fallbacks for legacy
+    const colors = {
+        'Disponible': 'bg-green-500/10 text-green-500 border border-green-500/20',
+        'Poco Stock': 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20',
+        'Sin Stock': 'bg-red-500/10 text-red-500 border border-red-500/20'
+    };
+    const cls = colors[statusValue] || 'bg-zinc-800 text-zinc-500 border border-zinc-700';
+    return `<span class="${cls} px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter">${statusValue}</span>`;
+}
+
+// Initial call
+renderStatusList();
 
 async function fetchLiveExchangeRates() {
     const btn = event?.currentTarget || event?.target?.closest('button');
