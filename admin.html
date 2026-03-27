@@ -820,6 +820,10 @@ function switchSection(name) {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('active', k === name);
     });
+    // Forzado de render si es el catálogo
+    if (name === 'catalogo') render(); 
+    if (name === 'estados') renderStatusList(); 
+    
     if (window.innerWidth < 769) {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebarOverlay').classList.add('hidden');

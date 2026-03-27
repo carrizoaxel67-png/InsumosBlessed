@@ -2,9 +2,9 @@
 let currentCategory = 'perfumes';
 let currentView = 'table';
 let hasUnsavedChanges = false;
-let workingPerfumes = [...perfumes];
-let workingVapes = [...vapes];
-let workingBarber = [...barber];
+let workingPerfumes = [];
+let workingVapes = [];
+let workingBarber = [];
 
 let isFullCatalogue = false; // Summarization state
 let customStatuses = JSON.parse(localStorage.getItem('blessed_statuses') || '[]');
@@ -30,8 +30,10 @@ async function init() {
 }
 
 async function fetchWeatherAndCurrency() {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 2000);
     try {
-        const resW = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.3375&longitude=-56.7136&current_weather=true');
+        const resW = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.3375&longitude=-56.7136&current_weather=true', { signal: controller.signal });
         const dataW = await resW.json();
         const temp = Math.round(dataW.current_weather.temperature);
         const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -43,7 +45,7 @@ async function fetchWeatherAndCurrency() {
     }
 
     try {
-        const resU = await fetch('https://open.er-api.com/v6/latest/USD');
+        const resU = await fetch('https://open.er-api.com/v6/latest/USD', { signal: controller.signal });
         const dataU = await resU.json();
         const uyu = dataU.rates.UYU.toFixed(2);
         const elU = document.getElementById('widgetUSD');
@@ -51,6 +53,7 @@ async function fetchWeatherAndCurrency() {
     } catch(e) {
         console.warn('Currency error', e);
     }
+    clearTimeout(t);
 }
 
 async function loadProductsFromCloud() {
