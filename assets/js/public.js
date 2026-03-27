@@ -18,7 +18,11 @@ async function initPublic() {
 
 async function loadPublicProducts() {
     try {
-        const res = await fetch('/api/get-products', { cache: 'no-store' });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const res = await fetch('/api/get-products', { cache: 'no-store', signal: controller.signal });
+        clearTimeout(timeoutId);
+
         if (res.ok) {
             const data = await res.json();
             if (data.perfumes && data.vapes) {
@@ -29,7 +33,7 @@ async function loadPublicProducts() {
             }
         }
     } catch (e) {
-        console.warn('Usando datos locales.', e);
+        console.warn('Usando datos locales por timeout en la nube.', e);
     }
     // Fallback a datos locales
     publicPerfumes = inventory.filter(p => p.visible !== false).map(p => ({ ...p, price: p.price || p.cost + 500 }));

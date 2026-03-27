@@ -9,11 +9,11 @@ let editingId = null;
 
 // ─── INICIALIZACIÓN ─────────────────────────────────────────────────────────
 async function init() {
+    fetchWeatherAndCurrency(); // Iniciar asíncronamente para evitar que se cuelgue al principio
     await loadProductsFromCloud();
     setupListeners();
     initViews();
     render();
-    fetchWeatherAndCurrency();
 }
 
 async function fetchWeatherAndCurrency() {
@@ -42,7 +42,11 @@ async function fetchWeatherAndCurrency() {
 
 async function loadProductsFromCloud() {
     try {
-        const res = await fetch('/api/get-products', { cache: 'no-store' });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const res = await fetch('/api/get-products', { cache: 'no-store', signal: controller.signal });
+        clearTimeout(timeoutId);
+
         if (res.ok) {
             const data = await res.json();
             if (data.perfumes && data.vapes) {
@@ -53,7 +57,7 @@ async function loadProductsFromCloud() {
             }
         }
     } catch (e) {
-        console.warn('Usando datos locales.', e);
+        console.warn('Usando datos locales por falla o timeout en la nube.', e);
     }
     // Fallback a datos locales
     workingPerfumes = inventory.map(p => ({
