@@ -16,9 +16,10 @@
 }
 
 /* ─── RESET & BASE ────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  height: -webkit-fill-available;
+}
 
 body {
   font-family: 'Outfit', 'Inter', sans-serif;
@@ -26,7 +27,16 @@ body {
   color: #e5e7eb;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   overflow-x: hidden;
+  margin: 0;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+button:active, .product-card:active {
+  transform: scale(0.96);
+  transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* ─── NOISE TEXTURE OVERLAY ──────────────────────────────────────────────── */

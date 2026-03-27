@@ -191,7 +191,9 @@ function renderPerfumes() {
     const gender = genderFilter.value;
 
     const filtered = publicPerfumes.filter(p => {
-        const matchSearch = p.name.toLowerCase().includes(search) || p.brand.toLowerCase().includes(search);
+        const name = (p.name || '').toLowerCase();
+        const brandStr = (p.brand || '').toLowerCase();
+        const matchSearch = name.includes(search) || brandStr.includes(search);
         const matchBrand  = brand === 'all' || p.brand === brand;
         const matchGender = gender === 'all' || p.gen === gender;
         return matchSearch && matchBrand && matchGender;
@@ -210,11 +212,11 @@ function renderPerfumes() {
             <div class="card-img-wrap h-48 md:h-60">
                 <span class="absolute top-3 left-3 text-[9px] font-black border px-1.5 py-0.5 rounded-md backdrop-blur-md ${getGenClass(p.gen)} z-10">${p.gen}</span>
                 ${getStatusTag(p)}
-                <img src="${p.img}" loading="lazy" decoding="async" class="w-full h-full object-contain" alt="${p.name}" onerror="this.style.display='none'">
+                <img src="${p.img}" loading="lazy" decoding="async" class="w-full h-full object-contain" alt="${p.name || 'Producto'}" onerror="this.style.display='none'">
             </div>
             <div class="p-4 flex flex-col flex-1">
-                <p class="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">${p.brand.replace('_', ' ')}</p>
-                <h3 class="text-white font-bold text-[15px] md:text-base leading-tight mb-auto line-clamp-2">${p.name}</h3>
+                <p class="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">${(p.brand || 'GENERICO').replace('_', ' ')}</p>
+                <h3 class="text-white font-bold text-[15px] md:text-base leading-tight mb-auto line-clamp-2">${p.name || 'Sin nombre'}</h3>
                 <div class="mt-4 pt-3.5 border-t border-zinc-800/60 flex justify-between items-center">
                     <span class="text-[10px] text-zinc-600 font-semibold">Precio final</span>
                     <span class="text-[#c5a059] font-black font-mono text-lg">$ ${p.price.toLocaleString()}</span>

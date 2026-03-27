@@ -215,7 +215,10 @@ function renderPerfumes() {
     const gender = document.getElementById('genderFilter').value;
 
     const filtered = workingPerfumes.filter(p => {
-        const matchSearch = p.name.toLowerCase().includes(search) || p.id.toLowerCase().includes(search);
+        const name = (p.name || '').toLowerCase();
+        const id = (p.id || '').toLowerCase();
+        const brandStr = (p.brand || '').toLowerCase();
+        const matchSearch = name.includes(search) || id.includes(search) || brandStr.includes(search);
         const matchBrand = brand === 'all' || p.brand === brand;
         const matchGender = gender === 'all' || p.gen === gender;
         return matchSearch && matchBrand && matchGender;
@@ -250,8 +253,8 @@ function buildPerfumeRow(p) {
         <td class="px-4 py-3"><div class="h-9 w-9 bg-black rounded-lg border border-zinc-800 flex items-center justify-center overflow-hidden relative">
             <img src="${p.img}" loading="lazy" decoding="async" class="w-full h-full object-contain absolute inset-0 m-auto" alt="${p.name}" onerror="this.style.display='none'">
         </div></td>
-        <td class="px-4 py-3"><div class="text-white font-semibold text-sm line-clamp-1">${p.name}</div>
-            <div class="text-[9px] text-zinc-600 uppercase tracking-widest leading-none mt-1 flex items-center gap-2">${p.brand.replace('_', ' ')} ${getAdminStatusBadge(p)}</div></td>
+        <td class="px-4 py-3"><div class="text-white font-semibold text-sm line-clamp-1">${p.name || 'Sin nombre'}</div>
+            <div class="text-[9px] text-zinc-600 uppercase tracking-widest leading-none mt-1 flex items-center gap-2">${(p.brand || 'GENERICO').replace('_', ' ')} ${getAdminStatusBadge(p)}</div></td>
         <td class="px-4 py-3"><span class="text-[9px] font-bold border px-1.5 py-0.5 rounded ${getGenClass(p.gen)}">${p.gen}</span></td>
         <td class="px-4 py-3 text-right font-mono text-zinc-500 text-xs">$ ${p.cost.toLocaleString()}</td>
         <td class="px-4 py-3 text-right">
