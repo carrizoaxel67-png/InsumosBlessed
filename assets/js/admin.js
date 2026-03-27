@@ -831,18 +831,35 @@ function calculateMargin() {
     if (totEl) totEl.textContent = Math.round(baseCost).toLocaleString('es-UY');
 }
 
-function convertCurrency() {
+function convertCurrency(suffix = '1') {
     const usd = parseFloat(document.getElementById('rateUSD').value) || 1;
     const eur = parseFloat(document.getElementById('rateEUR').value) || 1;
     const brl = parseFloat(document.getElementById('rateBRL').value) || 1;
 
     const rates = { USD: usd, EUR: eur, BRL: brl };
     
-    const amount = parseFloat(document.getElementById('amountToConvert').value) || 0;
-    const from = document.getElementById('currencyFrom').value;
+    // Si viene de un evento general sin suffix, actualizamos ambas
+    if (suffix === 'all') {
+        _performConvert(rates, '1');
+        _performConvert(rates, '2');
+        return;
+    }
+    
+    _performConvert(rates, suffix);
+}
+
+function _performConvert(rates, suffix) {
+    const amountEl = document.getElementById('amountToConvert' + suffix);
+    const fromEl = document.getElementById('currencyFrom' + suffix);
+    const resultEl = document.getElementById('convertedResult' + suffix);
+    
+    if (!amountEl || !fromEl || !resultEl) return;
+
+    const amount = parseFloat(amountEl.value) || 0;
+    const from = fromEl.value;
     
     const result = amount * rates[from];
-    document.getElementById('convertedResult').textContent = Math.round(result).toLocaleString('es-UY');
+    resultEl.textContent = Math.round(result).toLocaleString('es-UY');
 }
 
 async function fetchLiveExchangeRates() {
@@ -863,7 +880,7 @@ async function fetchLiveExchangeRates() {
         // 1 BRL en USD
         document.getElementById('rateBRL').value = ((1 / brlusd) * baseUYU).toFixed(2);
 
-        convertCurrency();
+        convertCurrency('all');
         showToast('✓ Cotizaciones actualizadas', 'success');
     } catch (err) {
         showToast('✗ Error obteniendo cotizaciones', 'error');
