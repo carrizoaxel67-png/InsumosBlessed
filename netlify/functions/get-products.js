@@ -31,10 +31,10 @@ exports.handler = async () => {
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify(data || { perfumes: null, vapes: null })
+            body: JSON.stringify(data || { perfumes: null, vapes: null, barber: null, customStatuses: [] })
         };
     } catch (err) {
         console.error("Blobs get error:", err.message);
-        return { statusCode: 200, headers, body: JSON.stringify({ perfumes: null, vapes: null }) };
+        return { statusCode: 200, headers, body: JSON.stringify({ perfumes: null, vapes: null, barber: null, customStatuses: [] }) };
     }
 };

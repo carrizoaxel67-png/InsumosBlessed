@@ -16,7 +16,8 @@ export default async (req, context) => {
         await store.setJSON("data", {
             perfumes: body.perfumes,
             vapes: body.vapes,
-            barber: body.barber
+            barber: body.barber,
+            customStatuses: body.customStatuses || []
         });
 
         return new Response(JSON.stringify({ success: true }), { status: 200, headers });

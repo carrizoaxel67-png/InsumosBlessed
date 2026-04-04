@@ -39,7 +39,8 @@ export const handler = async (event) => {
         const payload = {
             perfumes: data.perfumes,
             vapes: data.vapes,
-            barber: data.barber || []
+            barber: data.barber || [],
+            customStatuses: data.customStatuses || []
         };
 
         // Upsert con conflicto en id

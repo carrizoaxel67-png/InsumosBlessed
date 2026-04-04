@@ -59,7 +59,7 @@ async function fetchWeatherAndCurrency() {
 async function loadProductsFromCloud() {
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         const res = await fetch('/api/get-products', { cache: 'no-store', signal: controller.signal });
         clearTimeout(timeoutId);
 
@@ -69,6 +69,10 @@ async function loadProductsFromCloud() {
                 workingPerfumes = data.perfumes;
                 workingVapes = data.vapes;
                 workingBarber = data.barber || defaultBarber();
+                if (data.customStatuses && data.customStatuses.length > 0) {
+                    customStatuses = data.customStatuses;
+                    localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
+                }
                 return;
             }
         }
@@ -106,7 +110,8 @@ async function saveChanges() {
             body: JSON.stringify({
                 perfumes: workingPerfumes,
                 vapes: workingVapes,
-                barber: workingBarber
+                barber: workingBarber,
+                customStatuses: customStatuses
             })
         });
 
@@ -599,11 +604,24 @@ function openEditModal(category, id) {
     // Populate Status Select dynamically
     const statusSelect = document.getElementById('editStatus');
     if (statusSelect) {
-        statusSelect.innerHTML = customStatuses.map(st => `<option value="${st.id}">${st.label}</option>`).join('');
-        // Add legacy if not found
-        if (item.status && !customStatuses.find(st => st.id === item.status)) {
-            statusSelect.innerHTML += `<option value="${item.status}">${item.status}</option>`;
+        const defaultOptions = [
+            { id: 'available', label: 'DISPONIBLE' },
+            { id: 'house', label: 'PRODUCTO DE LA CASA' },
+            { id: 'low_stock', label: 'POCAS UNIDADES' },
+            { id: 'out_of_stock', label: 'SIN STOCK' },
+            { id: 'preorder', label: 'DISPONIBLE POR ENCARGUE' },
+            { id: 'unavailable', label: 'NO DISPONIBLE' }
+        ];
+        
+        let selectHtml = defaultOptions.map(opt => `<option value="${opt.id}">${opt.label}</option>`).join('');
+        selectHtml += customStatuses.map(st => `<option value="${st.id}">${st.label} (Custom)</option>`).join('');
+        
+        // Add legacy if not found in both
+        if (item.status && !customStatuses.find(st => st.id === item.status) && !defaultOptions.find(opt => opt.id === item.status)) {
+            selectHtml += `<option value="${item.status}">${item.status}</option>`;
         }
+        
+        statusSelect.innerHTML = selectHtml;
         statusSelect.value = item.status || 'available';
     }
     
@@ -950,6 +968,7 @@ function addNewStatus() {
     localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
     document.getElementById('newStateLabel').value = '';
     renderStatusList();
+    markUnsaved();
     showToast('✓ Estado creado correctamente', 'success');
 }
 
@@ -957,6 +976,7 @@ function removeStatus(id) {
     customStatuses = customStatuses.filter(st => st.id !== id);
     localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
     renderStatusList();
+    markUnsaved();
     showToast('Estado eliminado', 'success');
 }
 

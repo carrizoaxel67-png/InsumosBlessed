@@ -35,7 +35,12 @@ exports.handler = async (event) => {
         }
 
         const store = buildStore();
-        await store.setJSON("inventory", { perfumes: data.perfumes, vapes: data.vapes });
+        await store.setJSON("inventory", { 
+            perfumes: data.perfumes, 
+            vapes: data.vapes,
+            barber: data.barber || [],
+            customStatuses: data.customStatuses || []
+        });
 
         return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
     } catch (err) {

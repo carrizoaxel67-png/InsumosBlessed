@@ -21,7 +21,7 @@ async function initPublic() {
 async function loadPublicProducts() {
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         const res = await fetch('/api/get-products', { cache: 'no-store', signal: controller.signal });
         clearTimeout(timeoutId);
 
@@ -31,6 +31,9 @@ async function loadPublicProducts() {
                 publicPerfumes = data.perfumes.filter(p => p.visible !== false);
                 publicVapes    = data.vapes.filter(v => v.visible !== false);
                 publicBarber   = (data.barber || []).filter(b => b.visible !== false);
+                if (data.customStatuses) {
+                    customStatuses = data.customStatuses;
+                }
                 return;
             }
         }
@@ -175,8 +178,8 @@ const statusPriority = {
 
 function sortProductsByStatus(arr) {
     return arr.sort((a, b) => {
-        let pA = statusPriority[a.status || 'available'];
-        let pB = statusPriority[b.status || 'available'];
+        let pA = statusPriority[a.status || 'available'] ?? 2;
+        let pB = statusPriority[b.status || 'available'] ?? 2;
         
         // Mapeo legacy
         if (a.status === 'available' && a.stock !== null && a.stock !== undefined && a.stock <= 0) pA = statusPriority['out_of_stock'];
@@ -341,7 +344,13 @@ function getStatusTag(item) {
             break;
     }
 
-    if (!label) return '';
+    if (!label) {
+        const custom = customStatuses.find(s => s.id === st || s.label === st);
+        if (custom) {
+            return `<span class="absolute inset-0 bg-black/40 flex items-center justify-center z-20 pointer-events-none"><span class="text-[10px] md:text-xs font-black tracking-widest uppercase px-3 py-1.5 rounded-lg shadow-xl" style="background-color: ${custom.color}; color: ${custom.textColor}; border: 1px solid ${custom.color}">${custom.label}</span></span>`;
+        }
+        return '';
+    }
     return `<span class="absolute inset-0 bg-black/40 flex items-center justify-center z-20 pointer-events-none"><span class="text-[10px] md:text-xs font-black tracking-widest uppercase px-3 py-1.5 rounded-lg shadow-xl ${classes}">${label}</span></span>`;
 }
 
