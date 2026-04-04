@@ -13,37 +13,49 @@ const perfumeFilters = document.getElementById('perfumeFilters');
 
 // ─── INICIALIZACIÓN ───────────────────────────────────────────────────────────
 async function initPublic() {
-    await loadPublicProducts();
+    // Fase 1: carga local instantánea, sin esperar red
+    loadLocalFallback();
     setupPublicListeners();
     render();
-}
 
-async function loadPublicProducts() {
+    // Fase 2: intentar actualizar desde la nube en segundo plano
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-        const res = await fetch('/api/get-products', { cache: 'no-store', signal: controller.signal });
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+        const res = await fetch('/api/get-products', {
+            cache: 'no-store',
+            headers: { 'Pragma': 'no-cache' },
+            signal: controller.signal
+        });
         clearTimeout(timeoutId);
 
         if (res.ok) {
             const data = await res.json();
-            if (data.perfumes && data.vapes) {
+            // Sólo sobreescribir si la nube tiene datos reales
+            if (data && Array.isArray(data.perfumes) && data.perfumes.length > 0) {
                 publicPerfumes = data.perfumes.filter(p => p.visible !== false);
-                publicVapes    = data.vapes.filter(v => v.visible !== false);
-                publicBarber   = (data.barber || []).filter(b => b.visible !== false);
-                if (data.customStatuses) {
+                publicVapes    = Array.isArray(data.vapes) ? data.vapes.filter(v => v.visible !== false) : publicVapes;
+                publicBarber   = Array.isArray(data.barber) ? data.barber.filter(b => b.visible !== false) : publicBarber;
+                if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
                     customStatuses = data.customStatuses;
                 }
-                return;
+                render(); // re-render silencioso con datos de la nube
             }
         }
     } catch (e) {
-        console.warn('Usando datos locales por timeout en la nube.', e);
+        console.warn('No se pudo actualizar desde la nube, usando datos locales.', e);
     }
-    // Fallback a datos locales
-    publicPerfumes = inventory.filter(p => p.visible !== false).map(p => ({ ...p, price: p.price || p.cost + 500 }));
-    publicVapes    = vapeModels.filter(v => v.visible !== false).map(v => ({ ...v, price: v.price || v.cost + 500 }));
-    publicBarber   = (typeof barberItems !== 'undefined' ? barberItems : []).filter(b => b.visible !== false);
+}
+
+function loadLocalFallback() {
+    publicPerfumes = (typeof inventory !== 'undefined' ? inventory : [])
+        .filter(p => p.visible !== false)
+        .map(p => ({ ...p, price: p.price || p.cost + 500 }));
+    publicVapes = (typeof vapeModels !== 'undefined' ? vapeModels : [])
+        .filter(v => v.visible !== false)
+        .map(v => ({ ...v, price: v.price || v.cost + 500 }));
+    publicBarber = (typeof barberItems !== 'undefined' ? barberItems : [])
+        .filter(b => b.visible !== false);
 }
 
 function setupPublicListeners() {

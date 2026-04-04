@@ -22,10 +22,14 @@ let editingId = null;
 
 // ─── INICIALIZACIÓN ─────────────────────────────────────────────────────────
 async function init() {
-    fetchWeatherAndCurrency(); // Iniciar asíncronamente para evitar que se cuelgue al principio
-    await loadProductsFromCloud();
+    fetchWeatherAndCurrency();
+    // Fase 1 (sincrónica): llenar arrays desde datos locales para render inmediato
+    loadLocalData();
     setupListeners();
     initViews();
+    render();
+    // Fase 2 (asíncrona): actualizar desde la nube y re-renderizar si hay datos
+    await loadProductsFromCloud();
     render();
 }
 
@@ -56,30 +60,7 @@ async function fetchWeatherAndCurrency() {
     clearTimeout(t);
 }
 
-async function loadProductsFromCloud() {
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-        const res = await fetch('/api/get-products', { cache: 'no-store', signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-            const data = await res.json();
-            if (data.perfumes && data.vapes) {
-                workingPerfumes = data.perfumes;
-                workingVapes = data.vapes;
-                workingBarber = data.barber || defaultBarber();
-                if (data.customStatuses && data.customStatuses.length > 0) {
-                    customStatuses = data.customStatuses;
-                    localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
-                }
-                return;
-            }
-        }
-    } catch (e) {
-        console.warn('Usando datos locales por falla o timeout en la nube.', e);
-    }
-    // Fallback a datos locales
+function loadLocalData() {
     workingPerfumes = inventory.map(p => ({
         ...p, price: p.price || p.cost + 500,
         stock: p.stock ?? null, visible: p.visible ?? true
@@ -88,6 +69,39 @@ async function loadProductsFromCloud() {
         ...v, price: v.price || v.cost + 500, visible: v.visible ?? true
     }));
     workingBarber = defaultBarber();
+}
+
+async function loadProductsFromCloud() {
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+        const res = await fetch('/api/get-products', {
+            cache: 'no-store',
+            headers: { 'Pragma': 'no-cache' },
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+            const data = await res.json();
+            // Sólo sobreescribir si la nube tiene datos reales guardados
+            if (data && Array.isArray(data.perfumes) && data.perfumes.length > 0) {
+                workingPerfumes = data.perfumes;
+                workingVapes = Array.isArray(data.vapes) && data.vapes.length > 0
+                    ? data.vapes
+                    : workingVapes;
+                workingBarber = Array.isArray(data.barber) && data.barber.length > 0
+                    ? data.barber
+                    : workingBarber;
+                if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
+                    customStatuses = data.customStatuses;
+                    localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('Usando datos locales por falla o timeout en la nube.', e);
+    }
 }
 
 function defaultBarber() {
