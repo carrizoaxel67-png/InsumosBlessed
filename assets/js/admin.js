@@ -6,6 +6,7 @@ let workingPerfumes = [];
 let workingVapes = [];
 let workingBarber = [];
 let workingOffers = [];
+let workingPacks = [];
 
 let isFullCatalogue = false; // Summarization state
 let customStatuses = JSON.parse(localStorage.getItem('blessed_statuses') || '[]');
@@ -101,6 +102,9 @@ async function loadProductsFromCloud() {
                 if (Array.isArray(data.offers)) {
                     workingOffers = data.offers;
                 }
+                if (Array.isArray(data.packs)) {
+                    workingPacks = data.packs;
+                }
             }
         }
     } catch (e) {
@@ -130,7 +134,8 @@ async function saveChanges() {
                 vapes: workingVapes,
                 barber: workingBarber,
                 customStatuses: customStatuses,
-                offers: workingOffers
+                offers: workingOffers,
+                packs: workingPacks
             })
         });
 
@@ -178,7 +183,7 @@ function switchSection(name) {
     });
     if (name === 'catalogo') render();
     if (name === 'estados') renderStatusList();
-    if (name === 'ofertas') { populateOfferProductSelect(); renderOffers(); }
+    if (name === 'ofertas') { populateOfferProductSelect(); renderOffers(); populatePacksProductSelect(); renderPacks(); }
     if (name === 'calculadora' || name === 'divisas') { calculateMargin(); convertCurrency(); }
     if (window.innerWidth < 769) {
         document.getElementById('sidebar')?.classList.remove('open');
@@ -1132,6 +1137,121 @@ async function fetchLiveExchangeRates() {
     } finally {
         if (btn) setTimeout(() => btn.classList.remove('spin'), 500);
     }
+}
+
+// ─── COMBOS Y PACKS ──────────────────────────────────────────────────────────
+let stagingPackItems = [];
+
+function populatePacksProductSelect() {
+    const sel = document.getElementById('packProductSelect');
+    if (!sel) return;
+    const all = [...workingPerfumes, ...workingVapes, ...workingBarber];
+    sel.innerHTML = '<option value="">Añadir producto al combo...</option>' +
+        all.map(p => `<option value="${p.id}">${p.name} ($${p.price || 0})</option>`).join('');
+}
+
+function addPackItem() {
+    const sel = document.getElementById('packProductSelect');
+    const productId = sel.value;
+    if (!productId) return;
+    
+    const all = [...workingPerfumes, ...workingVapes, ...workingBarber];
+    const prod = all.find(p => p.id === productId);
+    if (!prod) return;
+
+    stagingPackItems.push(prod);
+    renderStagingPackItems();
+    showToast('Producto seleccionado para el combo', 'success');
+}
+
+function removeStagingPackItem(idx) {
+    stagingPackItems.splice(idx, 1);
+    renderStagingPackItems();
+}
+
+function renderStagingPackItems() {
+    const container = document.getElementById('stagingPackItems');
+    if (!container) return;
+    container.innerHTML = stagingPackItems.map((prod, idx) => `
+        <div class="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-lg p-2 animate-fade-in-up">
+            <div class="flex items-center gap-2">
+                <img src="${prod.img}" class="w-8 h-8 object-contain rounded bg-black">
+                <span class="text-xs text-zinc-300 font-bold">${prod.name}</span>
+            </div>
+            <button onclick="removeStagingPackItem(${idx})" class="text-zinc-600 hover:text-red-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+function createPack() {
+    const name = document.getElementById('packName').value.trim();
+    const price = +document.getElementById('packPrice').value;
+    let img = document.getElementById('packImg').value.trim();
+    
+    if (!img) img = 'https://cdn-icons-png.flaticon.com/512/3426/3426653.png'; 
+
+    if (!name || isNaN(price) || price <= 0 || stagingPackItems.length < 2) {
+        showToast('El combo debe tener un nombre, precio válido y al menos 2 productos', 'error');
+        return;
+    }
+
+    const pack = {
+        id: 'PACK-' + Date.now(),
+        name,
+        price,
+        img,
+        items: stagingPackItems.map(p => ({ id: p.id, name: p.name, img: p.img })),
+        visible: true,
+        isPack: true,
+        createdAt: Date.now()
+    };
+
+    workingPacks.push(pack);
+    markUnsaved();
+    renderPacks();
+    
+    document.getElementById('packName').value = '';
+    document.getElementById('packPrice').value = '';
+    document.getElementById('packImg').value = '';
+    stagingPackItems = [];
+    renderStagingPackItems();
+    
+    showToast('✓ Combo publicado', 'success');
+}
+
+function renderPacks() {
+    const container = document.getElementById('packsList');
+    if (!container) return;
+    if (!workingPacks || !workingPacks.length) {
+        container.innerHTML = '<p class="text-zinc-600 text-sm text-center py-12">No has creado ningún combo aún.</p>';
+        return;
+    }
+    container.innerHTML = workingPacks.map((pack, i) => `
+        <div class="bg-zinc-900/60 border border-[#c5a059]/30 rounded-2xl p-4 flex items-center gap-4 group">
+            <div class="w-14 h-14 shrink-0 bg-black rounded-xl overflow-hidden border border-[#c5a059]/50 p-1">
+                <img src="${pack.img}" class="w-full h-full object-contain" onerror="this.style.display='none'">
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-[#c5a059] font-black text-sm truncate uppercase tracking-widest">${pack.name}</p>
+                <p class="text-[9px] text-zinc-400 font-bold truncate mt-0.5 leading-tight">${pack.items.map(it => it.name).join(' + ')}</p>
+                <div class="mt-1">
+                    <span class="text-white font-mono text-sm font-black">$ ${pack.price.toLocaleString()}</span>
+                </div>
+            </div>
+            <button onclick="deletePack(${i})" class="opacity-0 group-hover:opacity-100 p-2 text-zinc-600 hover:text-red-500 transition-all shadow-xl bg-black rounded-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+function deletePack(i) {
+    workingPacks.splice(i, 1);
+    markUnsaved();
+    renderPacks();
+    showToast('Combo eliminado', 'success');
 }
 
 document.addEventListener('DOMContentLoaded', init);

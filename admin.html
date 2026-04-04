@@ -289,7 +289,7 @@
         </div>
         <div class="nav-item" id="navOfertas" onclick="switchSection('ofertas')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
-            Ofertas y Carteles
+            Ofertas y Combos
         </div>
 
         <p class="text-zinc-700 text-[9px] font-bold uppercase tracking-[0.3em] px-5 mb-2 mt-6">Divisas</p>
@@ -463,11 +463,11 @@
 
     </section>
 
-    <!-- ══ SECCIÓN: OFERTAS Y CARTELES ══ -->
+    <!-- ══ SECCIÓN: OFERTAS Y COMBOS ══ -->
     <section id="sectionOfertas" class="hidden p-6 md:p-8 fade-up">
         <div class="mb-8 mt-10 md:mt-0">
-            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Ofertas y Carteles</h1>
-            <p class="text-zinc-500 text-sm mt-1">Creá etiquetas de oferta para tus productos. Se muestran visualmente sobre las tarjetas.</p>
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Ofertas y Combos</h1>
+            <p class="text-zinc-500 text-sm mt-1">Creá etiquetas de oferta para tus productos o armá combos promocionales.</p>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Formulario -->
@@ -511,6 +511,48 @@
                 <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-black mb-4">Ofertas Activas</p>
                 <div id="offersList" class="space-y-3">
                     <p class="text-zinc-600 text-sm text-center py-12">No hay ofertas activas.</p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-zinc-800 my-10 border-dashed">
+
+        <!-- COMBO PACKS SUBSECTION -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Formulario Combos -->
+            <div class="bg-[#0c0c0c] border border-zinc-800 rounded-[28px] p-6 shadow-xl relative overflow-hidden">
+                <div class="absolute -right-16 -top-16 w-32 h-32 bg-[#c5a059] opacity-10 blur-3xl rounded-full"></div>
+                <p class="text-[#c5a059] font-black tracking-widest text-lg uppercase mb-5">Nuevo Combo Especial</p>
+                <div class="space-y-4 relative z-10">
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold block mb-2">Nombre del Combo</label>
+                        <input type="text" id="packName" placeholder="Ej: Combo Fin de Semana" class="admin-input">
+                    </div>
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold block mb-2">Productos que lo conforman</label>
+                        <div class="flex gap-2">
+                            <select id="packProductSelect" class="admin-input appearance-none flex-1"><option value="">Añadir producto al combo...</option></select>
+                            <button onclick="addPackItem()" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 rounded-xl text-lg font-bold transition-all">+</button>
+                        </div>
+                        <!-- Lista visual de items agregados antes de guardar el combo -->
+                        <div id="stagingPackItems" class="flex flex-col gap-2 mt-3 empty:hidden"></div>
+                    </div>
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold block mb-2">Precio Total Promo ($)</label>
+                        <input type="number" id="packPrice" placeholder="Precio mágico del combo" class="admin-input font-mono">
+                    </div>
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-bold block mb-2">URL de la Imagen (opcional)</label>
+                        <input type="text" id="packImg" placeholder="Si se deja vacío, usaremos un icono de regalo" class="admin-input font-mono text-xs">
+                    </div>
+                    <button onclick="createPack()" class="bg-gradient-to-r from-[#c5a059] to-[#a37c35] hover:opacity-90 text-black w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest mt-2 shadow-[0_0_20px_rgba(197,160,89,0.3)] transition-all">Publicar Combo</button>
+                </div>
+            </div>
+            <!-- Lista de combos activos -->
+            <div>
+                <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-black mb-4">Combos Activos</p>
+                <div id="packsList" class="space-y-3">
+                    <p class="text-zinc-600 text-sm text-center py-12">No has creado ningún combo aún.</p>
                 </div>
             </div>
         </div>

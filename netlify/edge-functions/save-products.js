@@ -18,7 +18,8 @@ export default async (req, context) => {
             vapes: body.vapes,
             barber: body.barber,
             customStatuses: body.customStatuses || [],
-            offers: body.offers || []
+            offers: body.offers || [],
+            packs: body.packs || []
         });
 
         return new Response(JSON.stringify({ success: true }), { status: 200, headers });

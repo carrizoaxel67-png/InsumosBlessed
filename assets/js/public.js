@@ -2,6 +2,7 @@ let currentCategory = 'perfumes';
 let publicPerfumes = [];
 let publicVapes = [];
 let publicBarber = [];
+let publicPacks = [];
 
 const searchInput = document.getElementById('searchInput');
 let customStatuses = JSON.parse(localStorage.getItem('blessed_statuses') || '[]');
@@ -44,6 +45,9 @@ async function initPublic() {
                 publicBarber   = Array.isArray(data.barber) ? data.barber.filter(b => b.visible !== false) : publicBarber;
                 if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
                     customStatuses = data.customStatuses;
+                }
+                if (Array.isArray(data.packs)) {
+                    publicPacks = data.packs.filter(p => p.visible !== false);
                 }
                 render(); // re-render silencioso con datos de la nube
             }
@@ -241,6 +245,33 @@ function renderPerfumes() {
     
     if (avonHeader) avonHeader.classList.toggle('hidden', !isAvonMode);
     if (loadBtn) loadBtn.classList.toggle('hidden', !isAvonMode || filtered.length <= 8);
+
+    // Renderizar Combos (Sólo si no hay filtros o si estamos en Avon Mode)
+    if (publicPacks && publicPacks.length > 0 && !isDirtyFilter) {
+        publicPacks.forEach((pack, i) => {
+            const card = document.createElement('div');
+            card.className = `product-card animate-fade-in-up bg-zinc-900/40 border border-[#c5a059]/30 col-span-1 md:col-span-2 row-span-2 shadow-[0_0_20px_rgba(197,160,89,0.05)]`;
+            card.style.animationDelay = `${Math.min(i * 0.05, 0.4)}s`;
+            card.style.opacity = '0';
+            card.onclick = () => showInfo(pack, 'pack');
+            card.innerHTML = `
+                <div class="card-img-wrap h-40 md:h-64 p-4">
+                    <span class="absolute top-3 left-3 text-[9px] font-black border border-[#c5a059]/50 text-[#c5a059] bg-[#c5a059]/10 px-2 py-0.5 rounded-md backdrop-blur-md z-10">COMBO / PACK</span>
+                    <img src="${pack.img}" loading="lazy" decoding="async" class="w-full h-full object-contain" alt="${pack.name}" onerror="this.style.display='none'">
+                </div>
+                <div class="p-4 flex flex-col flex-1 bg-gradient-to-t from-[#050505] to-transparent">
+                    <p class="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-black mb-1">${pack.items.length} PRODUCTOS</p>
+                    <h3 class="text-[#c5a059] font-black text-[16px] md:text-lg leading-tight mb-2 line-clamp-2">${pack.name}</h3>
+                    <p class="text-[10px] md:text-xs text-zinc-400 font-semibold mb-auto line-clamp-3">${pack.items.map(it => it.name).join(' + ')}</p>
+                    <div class="mt-4 pt-3.5 border-t border-[#c5a059]/20 flex justify-between items-center relative">
+                        <span class="text-[10px] text-[#c5a059] opacity-70 font-semibold absolute -top-5 left-0">Precio Promo</span>
+                        <span class="text-white font-black font-mono text-xl">$ ${pack.price.toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+            inventoryGallery.appendChild(card);
+        });
+    }
 
     const sorted = sortProductsByStatus(filtered);
     const itemsToShow = isAvonMode ? sorted.slice(0, 8) : sorted;
@@ -453,7 +484,10 @@ function showInfo(item, type) {
         
     const descEl = document.getElementById('modalDesc');
     if (descEl) {
-        if (item.description) {
+        if (type === 'pack') {
+            descEl.innerHTML = `<p class="text-[#c5a059] font-bold text-xs uppercase tracking-widest mb-2 border-b border-zinc-800 pb-1">Incluye:</p> <ul class="list-disc pl-4 text-xs space-y-1">${item.items.map(it => `<li>${it.name}</li>`).join('')}</ul>`;
+            descEl.classList.remove('hidden');
+        } else if (item.description) {
             descEl.textContent = item.description;
             descEl.classList.remove('hidden');
         } else {
@@ -468,8 +502,12 @@ function showInfo(item, type) {
 
     const waBtn = document.getElementById('btnBuyWA');
     if (waBtn) {
-        const productLabel = type === 'vape' ? 'vaporizador' : type === 'barber' ? 'insumo de barbería' : 'perfume';
-        const msg = encodeURIComponent(`¡Hola! Me interesa comprar el ${productLabel} ${item.name} a $${item.price}. ¿Tienen stock?`);
+        let productLabel = 'perfume';
+        if (type === 'vape') productLabel = 'vaporizador';
+        else if (type === 'barber') productLabel = 'insumo de barbería';
+        else if (type === 'pack') productLabel = 'combo';
+        
+        const msg = encodeURIComponent(`¡Hola! Me interesa comprar el ${productLabel} ${item.name} a $${finalPrice}. ¿Tienen stock?`);
         waBtn.href = `https://wa.me/59892549474?text=${msg}`;
     }
 
