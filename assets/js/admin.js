@@ -25,12 +25,12 @@ let editingId = null;
 // ─── INICIALIZACIÓN ─────────────────────────────────────────────────────────
 async function init() {
     fetchWeatherAndCurrency();
-    // Fase 1 (sincrónica): llenar arrays desde datos locales para render inmediato
+    // Fase 1 (sincrónica): llenar arrays desde datos locales — render immediate
     loadLocalData();
     setupListeners();
     initViews();
-    render();
-    // Fase 2 (asíncrona): actualizar desde la nube y re-renderizar si hay datos
+    render(); // Muestra contenido local
+    // Fase 2 (asíncrona): actualizar desde la nube silenciosamente
     await loadProductsFromCloud();
     render();
 }
@@ -1017,17 +1017,11 @@ function removeStatus(id) {
 
 // ─── ESTADÍSTICAS ────────────────────────────────────────────────────────────
 function updateStats() {
-    const all = [...workingPerfumes, ...workingVapes, ...workingBarber];
-    const total = all.length;
-    const avail = all.filter(p => (p.status === 'available' || !p.status) && (p.stock === null || p.stock > 3)).length;
-    const low   = all.filter(p => p.stock !== null && p.stock > 0 && p.stock <= 3).length;
-    const out   = all.filter(p => p.stock !== null && p.stock <= 0).length;
     const el = (id) => document.getElementById(id);
-    if (el('statTotal'))     el('statTotal').textContent     = total;
-    if (el('statAvailable')) el('statAvailable').textContent = avail;
-    if (el('statLow'))       el('statLow').textContent       = low;
-    if (el('statOut'))       el('statOut').textContent       = out;
-    if (el('totalItems'))    el('totalItems').textContent    = (currentCategory === 'perfumes' ? workingPerfumes : currentCategory === 'vapes' ? workingVapes : workingBarber).length;
+    if (el('statPerfumes')) el('statPerfumes').textContent = workingPerfumes.length;
+    if (el('statVapes'))    el('statVapes').textContent    = workingVapes.length;
+    if (el('statBarber'))   el('statBarber').textContent   = workingBarber.length;
+    if (el('statPacks'))    el('statPacks').textContent    = (workingPacks || []).length;
 }
 
 function enableFullCatalogue()  { isFullCatalogue = true;  render(); }
@@ -1185,6 +1179,23 @@ function renderStagingPackItems() {
     `).join('');
 }
 
+function previewPackImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const b64 = e.target.result;
+        document.getElementById('packImg').value = b64;
+        const preview = document.getElementById('packImgPreview');
+        const img = document.getElementById('packImgPreviewImg');
+        if (preview && img) {
+            img.src = b64;
+            preview.classList.remove('hidden');
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
 function createPack() {
     const name = document.getElementById('packName').value.trim();
     const price = +document.getElementById('packPrice').value;
@@ -1215,6 +1226,11 @@ function createPack() {
     document.getElementById('packName').value = '';
     document.getElementById('packPrice').value = '';
     document.getElementById('packImg').value = '';
+    // Reset file input and preview
+    const fileInput = document.getElementById('packImgFile');
+    if (fileInput) fileInput.value = '';
+    const preview = document.getElementById('packImgPreview');
+    if (preview) preview.classList.add('hidden');
     stagingPackItems = [];
     renderStagingPackItems();
     
