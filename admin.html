@@ -287,6 +287,10 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
             Estados de Producto
         </div>
+        <div class="nav-item" id="navOfertas" onclick="switchSection('ofertas')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+            Ofertas y Carteles
+        </div>
 
         <p class="text-zinc-700 text-[9px] font-bold uppercase tracking-[0.3em] px-5 mb-2 mt-6">Divisas</p>
         <div class="nav-item" id="navDivisas" onclick="switchSection('divisas')">
@@ -443,14 +447,73 @@
             <p class="text-sm text-zinc-600">Agregá tu primer producto para empezar a vender.</p>
         </div>
 
+        <!-- fullCatalogueAlert: se muestra cuando se activa el catálogo completo -->
+        <div id="fullCatalogueAlert" class="hidden mt-4 flex items-center justify-between gap-3 bg-emerald-950/30 border border-emerald-800/30 rounded-xl px-4 py-3">
+            <span class="text-emerald-400 text-xs font-bold uppercase tracking-widest">✓ Mostrando catálogo completo</span>
+            <button onclick="disableFullCatalogue()" class="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold px-3 py-1.5 rounded-lg transition-all">Resumir</button>
+        </div>
+
         <!-- ACTION BANNER (Manage All) -->
         <div id="manageAllBanner" class="mt-8 text-center bg-zinc-900/40 border border-zinc-800 p-8 rounded-[28px] border-dashed">
-            <p class="text-zinc-500 text-sm mb-4">Estas viendo una selección de productos destacados.</p>
+            <p class="text-zinc-500 text-sm mb-4">Estás viendo una selección resumida.</p>
             <button onclick="enableFullCatalogue()" class="btn-gold px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl">
                 Gestionar Catálogo Completo
             </button>
         </div>
 
+    </section>
+
+    <!-- ══ SECCIÓN: OFERTAS Y CARTELES ══ -->
+    <section id="sectionOfertas" class="hidden p-6 md:p-8 fade-up">
+        <div class="mb-8 mt-10 md:mt-0">
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Ofertas y Carteles</h1>
+            <p class="text-zinc-500 text-sm mt-1">Creá etiquetas de oferta para tus productos. Se muestran visualmente sobre las tarjetas.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Formulario -->
+            <div class="bg-[#0c0c0c] border border-zinc-800 rounded-[28px] p-6 shadow-xl">
+                <p class="text-zinc-300 font-bold mb-5">Nueva Oferta</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-black block mb-2">Producto</label>
+                        <select id="offerProductSelect" class="admin-input appearance-none"><option value="">Cargando productos...</option></select>
+                    </div>
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-black block mb-2">Texto del Cartel (Ej: OFERTA, 2x1, -30%)</label>
+                        <input type="text" id="offerBadgeText" placeholder="OFERTA ESPECIAL" class="admin-input uppercase">
+                    </div>
+                    <div>
+                        <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-black block mb-2">Precio Oferta ($) — Opcional</label>
+                        <input type="number" id="offerPrice" placeholder="Dejar vacío para mantener precio actual" class="admin-input font-mono">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-black block mb-2">Color del Cartel</label>
+                            <div class="flex items-center gap-3 bg-black/40 p-2 rounded-xl border border-zinc-800">
+                                <input type="color" id="offerBadgeColor" value="#ef4444" class="w-10 h-10 rounded-lg cursor-pointer border-none bg-transparent">
+                                <span class="text-xs text-zinc-400 font-mono">#ef4444</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-zinc-500 text-[10px] uppercase tracking-widest font-black block mb-2">Color del Texto</label>
+                            <select id="offerBadgeTextColor" class="admin-input">
+                                <option value="#ffffff">Blanco</option>
+                                <option value="#000000">Negro</option>
+                                <option value="#d4af37">Dorado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="addOffer()" class="btn-gold w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest mt-2">Crear Oferta</button>
+                </div>
+            </div>
+            <!-- Lista de ofertas activas -->
+            <div>
+                <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-black mb-4">Ofertas Activas</p>
+                <div id="offersList" class="space-y-3">
+                    <p class="text-zinc-600 text-sm text-center py-12">No hay ofertas activas.</p>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- ══ SECCIÓN: ESTADOS DE PRODUCTO ══ -->
@@ -808,36 +871,6 @@
 <script src="assets/js/barber_data.js"></script>
 <script src="assets/js/admin.js"></script>
 <script>
-// ── SIDEBAR / SECTIONS ──────────────────────────────────────────────────────
-function switchSection(name) {
-    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas','Estados'];
-    sections.forEach(s => {
-        const el = document.getElementById('section' + s);
-        if (el) el.classList.toggle('hidden', s.toLowerCase() !== name);
-    });
-    const navMap = { catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora', reviews:'navReviews', divisas:'navDivisas', reservas:'navReservas', estados:'navEstados' };
-    Object.entries(navMap).forEach(([k,id]) => {
-        const el = document.getElementById(id);
-        if (el) el.classList.toggle('active', k === name);
-    });
-    // Forzado de render si es el catálogo
-    if (name === 'catalogo') render(); 
-    if (name === 'estados') renderStatusList(); 
-    
-    if (window.innerWidth < 769) {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.add('hidden');
-    }
-    if (name === 'calculadora' || name === 'divisas') { calculateMargin(); convertCurrency(); }
-}
-
-function toggleSidebar() {
-    const sb = document.getElementById('sidebar');
-    const ov = document.getElementById('sidebarOverlay');
-    sb.classList.toggle('open');
-    ov.classList.toggle('hidden');
-}
-
 // ── CATEGORIES ────────────────────────────────────────────────────────────────
 let customCategories = JSON.parse(localStorage.getItem('blessed_categories') || '[]');
 
@@ -882,7 +915,7 @@ function setUserEmail() {
     } catch(e) {}
 }
 netlifyIdentity.on('login', () => { setUserEmail(); });
-netlifyIdentity.on('init', () => { setUserEmail(); });
+netlifyIdentity.on('init',  () => { setUserEmail(); });
 window.addEventListener('DOMContentLoaded', () => {
     setUserEmail();
     renderCategories();
@@ -910,9 +943,6 @@ function renderReviews() {
             <div class="flex items-center gap-2">
                 <button onclick="toggleReview(${i})" class="text-xs font-bold text-zinc-500 hover:text-[#d4af37] transition-colors">${r.visible ? 'Ocultar' : 'Mostrar'}</button>
                 <span class="text-zinc-700">·</span>
-                <button onclick="editReview(${i})" class="text-xs text-zinc-500 hover:text-white transition-colors">
-                    <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                </button>
                 <button onclick="deleteReview(${i})" class="text-xs text-zinc-500 hover:text-red-400 transition-colors ml-auto">
                     <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </button>
@@ -954,31 +984,9 @@ function saveReview() {
     renderReviews();
     showToast('✓ Reseña guardada', 'success');
 }
-function editReview(i) { openReviewModal(i); }
-function toggleReview(i) {
-    reviews[i].visible = !reviews[i].visible;
-    localStorage.setItem('blessed_reviews', JSON.stringify(reviews));
-    renderReviews();
-}
-function deleteReview(i) {
-    reviews.splice(i, 1);
-    localStorage.setItem('blessed_reviews', JSON.stringify(reviews));
-    renderReviews();
-    showToast('🗑 Reseña eliminada', 'success');
-}
-
-// ── STATS ─────────────────────────────────────────────────────────────────────
-function updateStats() {
-    const all = [...workingPerfumes, ...workingVapes, ...workingBarber];
-    const total = all.length;
-    const avail = all.filter(p => (p.status === 'available' || !p.status) && (p.stock === null || p.stock > 3)).length;
-    const low = all.filter(p => p.stock !== null && p.stock > 0 && p.stock <= 3).length;
-    const out = all.filter(p => p.stock !== null && p.stock <= 0).length;
-    document.getElementById('statTotal').textContent = total;
-    document.getElementById('statAvailable').textContent = avail;
-    document.getElementById('statLow').textContent = low;
-    document.getElementById('statOut').textContent = out;
-}
+function editReview(i)   { openReviewModal(i); }
+function toggleReview(i) { reviews[i].visible = !reviews[i].visible; localStorage.setItem('blessed_reviews', JSON.stringify(reviews)); renderReviews(); }
+function deleteReview(i) { reviews.splice(i, 1); localStorage.setItem('blessed_reviews', JSON.stringify(reviews)); renderReviews(); showToast('🗑 Reseña eliminada', 'success'); }
 </script>
 </body>
 </html>

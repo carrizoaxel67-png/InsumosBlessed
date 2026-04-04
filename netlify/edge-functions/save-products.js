@@ -17,7 +17,8 @@ export default async (req, context) => {
             perfumes: body.perfumes,
             vapes: body.vapes,
             barber: body.barber,
-            customStatuses: body.customStatuses || []
+            customStatuses: body.customStatuses || [],
+            offers: body.offers || []
         });
 
         return new Response(JSON.stringify({ success: true }), { status: 200, headers });

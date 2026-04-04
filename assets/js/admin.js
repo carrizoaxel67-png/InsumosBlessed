@@ -5,6 +5,7 @@ let hasUnsavedChanges = false;
 let workingPerfumes = [];
 let workingVapes = [];
 let workingBarber = [];
+let workingOffers = [];
 
 let isFullCatalogue = false; // Summarization state
 let customStatuses = JSON.parse(localStorage.getItem('blessed_statuses') || '[]');
@@ -97,6 +98,9 @@ async function loadProductsFromCloud() {
                     customStatuses = data.customStatuses;
                     localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
                 }
+                if (Array.isArray(data.offers)) {
+                    workingOffers = data.offers;
+                }
             }
         }
     } catch (e) {
@@ -125,7 +129,8 @@ async function saveChanges() {
                 perfumes: workingPerfumes,
                 vapes: workingVapes,
                 barber: workingBarber,
-                customStatuses: customStatuses
+                customStatuses: customStatuses,
+                offers: workingOffers
             })
         });
 
@@ -157,16 +162,33 @@ function markUnsaved() {
 
 // ── SIDEBAR / SECTIONS ──────────────────────────────────────────────────────
 function switchSection(name) {
-    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas'];
+    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas','Estados','Ofertas'];
     sections.forEach(s => {
         const el = document.getElementById('section' + s);
         if (el) el.classList.toggle('hidden', s.toLowerCase() !== name);
     });
-    const navMap = { catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora', reviews:'navReviews', divisas:'navDivisas', reservas:'navReservas' };
+    const navMap = {
+        catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora',
+        reviews:'navReviews', divisas:'navDivisas', reservas:'navReservas',
+        estados:'navEstados', ofertas:'navOfertas'
+    };
     Object.entries(navMap).forEach(([k,id]) => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('active', k === name);
     });
+    if (name === 'catalogo') render();
+    if (name === 'estados') renderStatusList();
+    if (name === 'ofertas') { populateOfferProductSelect(); renderOffers(); }
+    if (name === 'calculadora' || name === 'divisas') { calculateMargin(); convertCurrency(); }
+    if (window.innerWidth < 769) {
+        document.getElementById('sidebar')?.classList.remove('open');
+        document.getElementById('sidebarOverlay')?.classList.add('hidden');
+    }
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar')?.classList.toggle('open');
+    document.getElementById('sidebarOverlay')?.classList.toggle('hidden');
 }
 
 // ─── CATEGORÍAS ──────────────────────────────────────────────────────────────
@@ -337,8 +359,8 @@ function renderVapes() {
 
     // Summarization logic
     const itemsToShow = isFullCatalogue ? workingVapes : workingVapes.slice(0, 3);
-    document.getElementById('manageAllBanner').classList.toggle('hidden', isFullCatalogue || workingVapes.length <= 3);
-    document.getElementById('fullCatalogueAlert').classList.toggle('hidden', !isFullCatalogue);
+    document.getElementById('manageAllBanner')?.classList.toggle('hidden', isFullCatalogue || workingVapes.length <= 3);
+    document.getElementById('fullCatalogueAlert')?.classList.toggle('hidden', !isFullCatalogue);
 
     itemsToShow.forEach(v => {
         tableBody.appendChild(buildVapeRow(v));
@@ -994,22 +1016,101 @@ function removeStatus(id) {
     showToast('Estado eliminado', 'success');
 }
 
-function getAdminStatusBadge(statusValue) {
-    // Check if it matches a custom status label or id
-    const custom = customStatuses.find(st => st.label === statusValue || st.id === statusValue);
-    
-    if (custom) {
-        return `<span class="px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter" style="background-color: ${custom.color}; color: ${custom.textColor}">${custom.label}</span>`;
-    }
+// ─── ESTADÍSTICAS ────────────────────────────────────────────────────────────
+function updateStats() {
+    const all = [...workingPerfumes, ...workingVapes, ...workingBarber];
+    const total = all.length;
+    const avail = all.filter(p => (p.status === 'available' || !p.status) && (p.stock === null || p.stock > 3)).length;
+    const low   = all.filter(p => p.stock !== null && p.stock > 0 && p.stock <= 3).length;
+    const out   = all.filter(p => p.stock !== null && p.stock <= 0).length;
+    const el = (id) => document.getElementById(id);
+    if (el('statTotal'))     el('statTotal').textContent     = total;
+    if (el('statAvailable')) el('statAvailable').textContent = avail;
+    if (el('statLow'))       el('statLow').textContent       = low;
+    if (el('statOut'))       el('statOut').textContent       = out;
+    if (el('totalItems'))    el('totalItems').textContent    = (currentCategory === 'perfumes' ? workingPerfumes : currentCategory === 'vapes' ? workingVapes : workingBarber).length;
+}
 
-    // Fallbacks for legacy
-    const colors = {
-        'Disponible': 'bg-green-500/10 text-green-500 border border-green-500/20',
-        'Poco Stock': 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20',
-        'Sin Stock': 'bg-red-500/10 text-red-500 border border-red-500/20'
+function enableFullCatalogue()  { isFullCatalogue = true;  render(); }
+function disableFullCatalogue() { isFullCatalogue = false; render(); }
+
+// ─── OFERTAS ─────────────────────────────────────────────────────────────────
+function populateOfferProductSelect() {
+    const sel = document.getElementById('offerProductSelect');
+    if (!sel) return;
+    const all = [...workingPerfumes, ...workingVapes, ...workingBarber];
+    sel.innerHTML = '<option value="">Seleccionar producto...</option>' +
+        all.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+function renderOffers() {
+    const container = document.getElementById('offersList');
+    if (!container) return;
+    if (!workingOffers.length) {
+        container.innerHTML = '<p class="text-zinc-600 text-sm text-center py-12 col-span-full">No hay ofertas activas.</p>';
+        return;
+    }
+    container.innerHTML = '';
+    workingOffers.forEach((offer, i) => {
+        const all = [...workingPerfumes, ...workingVapes, ...workingBarber];
+        const prod = all.find(p => p.id === offer.productId);
+        const div = document.createElement('div');
+        div.className = 'bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 flex items-center gap-4 group';
+        div.innerHTML = `
+            <div class="w-14 h-14 shrink-0 bg-black rounded-xl overflow-hidden border border-zinc-800">
+                <img src="${prod?.img||''}" class="w-full h-full object-contain" onerror="this.style.display='none'">
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-white font-bold text-sm truncate">${prod?.name||'Producto eliminado'}</p>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded" style="background:${offer.badgeColor};color:${offer.badgeTextColor}">${offer.badgeText}</span>
+                    ${offer.offerPrice ? `<span class="text-[#d4af37] font-mono text-xs font-black">$ ${offer.offerPrice.toLocaleString()}</span>
+                    ${prod?.price ? `<span class="text-zinc-600 text-xs line-through font-mono">$ ${prod.price.toLocaleString()}</span>` : ''}` : ''}
+                </div>
+            </div>
+            <button onclick="deleteOffer(${i})" class="opacity-0 group-hover:opacity-100 p-2 text-zinc-600 hover:text-red-500 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>`;
+        container.appendChild(div);
+    });
+}
+
+function addOffer() {
+    const productId    = document.getElementById('offerProductSelect')?.value;
+    const badgeText    = document.getElementById('offerBadgeText')?.value.trim();
+    const offerPrice   = +document.getElementById('offerPrice')?.value || 0;
+    const badgeColor   = document.getElementById('offerBadgeColor')?.value || '#ef4444';
+    const badgeTextColor = document.getElementById('offerBadgeTextColor')?.value || '#ffffff';
+    if (!productId || !badgeText) { showToast('Seleccioná un producto y escribí la etiqueta', 'error'); return; }
+
+    // Apply badge to product object directly
+    const applyTo = (arr) => {
+        const p = arr.find(x => x.id === productId);
+        if (p) { p.offerBadge = badgeText; p.offerBadgeColor = badgeColor; p.offerBadgeTextColor = badgeTextColor; if (offerPrice) p.offerPrice = offerPrice; }
+        return !!p;
     };
-    const cls = colors[statusValue] || 'bg-zinc-800 text-zinc-500 border border-zinc-700';
-    return `<span class="${cls} px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter">${statusValue}</span>`;
+    applyTo(workingPerfumes) || applyTo(workingVapes) || applyTo(workingBarber);
+
+    workingOffers.push({ productId, badgeText, offerPrice, badgeColor, badgeTextColor, createdAt: Date.now() });
+    markUnsaved();
+    renderOffers();
+    document.getElementById('offerProductSelect').value = '';
+    document.getElementById('offerBadgeText').value = '';
+    document.getElementById('offerPrice').value = '';
+    showToast('✓ Oferta creada', 'success');
+}
+
+function deleteOffer(i) {
+    const offer = workingOffers[i];
+    const clearFrom = (arr) => {
+        const p = arr.find(x => x.id === offer.productId);
+        if (p) { delete p.offerBadge; delete p.offerBadgeColor; delete p.offerBadgeTextColor; delete p.offerPrice; }
+    };
+    clearFrom(workingPerfumes); clearFrom(workingVapes); clearFrom(workingBarber);
+    workingOffers.splice(i, 1);
+    markUnsaved();
+    renderOffers();
+    showToast('Oferta eliminada', 'success');
 }
 
 // Initial call
@@ -1039,4 +1140,4 @@ async function fetchLiveExchangeRates() {
     }
 }
 
-init();
+document.addEventListener('DOMContentLoaded', init);

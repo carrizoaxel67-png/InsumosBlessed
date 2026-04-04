@@ -5,6 +5,12 @@ let publicBarber = [];
 
 const searchInput = document.getElementById('searchInput');
 let customStatuses = JSON.parse(localStorage.getItem('blessed_statuses') || '[]');
+let isFullPublicCatalogue = false;
+
+function enableFullPublicCatalogue() {
+    isFullPublicCatalogue = true;
+    render();
+}
 
 const brandFilter = document.getElementById('brandFilter');
 const genderFilter = document.getElementById('genderFilter');
@@ -190,6 +196,11 @@ const statusPriority = {
 
 function sortProductsByStatus(arr) {
     return arr.sort((a, b) => {
+        // Prioridad absoluta a productos con oferta
+        if ((a.offerBadge ? 1 : 0) !== (b.offerBadge ? 1 : 0)) {
+            return (b.offerBadge ? 1 : 0) - (a.offerBadge ? 1 : 0);
+        }
+
         let pA = statusPriority[a.status || 'available'] ?? 2;
         let pB = statusPriority[b.status || 'available'] ?? 2;
         
@@ -201,9 +212,14 @@ function sortProductsByStatus(arr) {
     });
 }
 
+function getOfferBadgeTag(item) {
+    if (!item.offerBadge) return '';
+    return `<span class="absolute top-3 right-3 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-lg z-20" style="background:${item.offerBadgeColor||'#ef4444'}; color:${item.offerBadgeTextColor||'#fff'}; border: 1px solid ${item.offerBadgeColor||'#ef4444'}">${item.offerBadge}</span>`;
+}
+
 // ─── PERFUMES ─────────────────────────────────────────────────────────────────
 function renderPerfumes() {
-    const search = searchInput.value.toLowerCase();
+    const search = searchInput.value.toLowerCase().trim();
     const brand  = brandFilter.value;
     const gender = genderFilter.value;
 
@@ -216,9 +232,20 @@ function renderPerfumes() {
         return matchSearch && matchBrand && matchGender;
     });
 
-    const sorted = sortProductsByStatus(filtered);
+    const isDirtyFilter = search !== '' || brand !== 'all' || gender !== 'all';
+    const isAvonMode = !isFullPublicCatalogue && !isDirtyFilter;
 
-    sorted.forEach((p, i) => {
+    // Elementos DOM del Avon Mode
+    const avonHeader = document.getElementById('avonModeHeader');
+    const loadBtn = document.getElementById('loadFullCatalogueBtn');
+    
+    if (avonHeader) avonHeader.classList.toggle('hidden', !isAvonMode);
+    if (loadBtn) loadBtn.classList.toggle('hidden', !isAvonMode || filtered.length <= 8);
+
+    const sorted = sortProductsByStatus(filtered);
+    const itemsToShow = isAvonMode ? sorted.slice(0, 8) : sorted;
+
+    itemsToShow.forEach((p, i) => {
         const isHouse = p.status === 'house';
         const card = document.createElement('div');
         card.className = `product-card animate-fade-in-up ${isHouse ? 'card-house' : ''}`;
@@ -228,22 +255,26 @@ function renderPerfumes() {
         card.innerHTML = `
             <div class="card-img-wrap h-48 md:h-60">
                 <span class="absolute top-3 left-3 text-[9px] font-black border px-1.5 py-0.5 rounded-md backdrop-blur-md ${getGenClass(p.gen)} z-10">${p.gen}</span>
+                ${getOfferBadgeTag(p)}
                 ${getStatusTag(p)}
                 <img src="${p.img}" loading="lazy" decoding="async" class="w-full h-full object-contain" alt="${p.name || 'Producto'}" onerror="this.style.display='none'">
             </div>
             <div class="p-4 flex flex-col flex-1">
                 <p class="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">${(p.brand || 'GENERICO').replace('_', ' ')}</p>
                 <h3 class="text-white font-bold text-[15px] md:text-base leading-tight mb-auto line-clamp-2">${p.name || 'Sin nombre'}</h3>
-                <div class="mt-4 pt-3.5 border-t border-zinc-800/60 flex justify-between items-center">
-                    <span class="text-[10px] text-zinc-600 font-semibold">Precio final</span>
-                    <span class="text-[#c5a059] font-black font-mono text-lg">$ ${p.price.toLocaleString()}</span>
+                <div class="mt-4 pt-3.5 border-t border-zinc-800/60 flex justify-between items-center relative">
+                    <span class="text-[10px] text-zinc-600 font-semibold absolute -top-5 left-0">Precio final</span>
+                    ${p.offerPrice 
+                        ? `<div class="flex flex-col"><span class="text-[#c5a059] font-black font-mono text-lg leading-none">$ ${p.offerPrice.toLocaleString()}</span><span class="text-zinc-600 text-[10px] line-through font-mono mt-0.5">$ ${p.price.toLocaleString()}</span></div>` 
+                        : `<span class="text-[#c5a059] font-black font-mono text-lg">$ ${p.price.toLocaleString()}</span>`
+                    }
                 </div>
             </div>
         `;
         inventoryGallery.appendChild(card);
     });
 
-    updateCounters(filtered.length, 'Fragancias');
+    updateCounters(itemsToShow.length, 'Fragancias');
 }
 
 
@@ -257,17 +288,21 @@ function renderVapes() {
         card.style.opacity = '0';
         card.onclick = () => showInfo(v, 'vape');
         card.innerHTML = `
-            <div class="card-img-wrap h-48 md:h-60">
+            <div class="card-img-wrap h-40 md:h-52">
                 <span class="absolute top-3 left-3 text-[9px] font-black border border-green-900/50 text-green-400 bg-green-900/15 px-1.5 py-0.5 rounded-md backdrop-blur-md z-10">${v.puffs} PUFFS</span>
+                ${getOfferBadgeTag(v)}
                 ${getStatusTag(v)}
                 <img src="${v.img}" loading="lazy" decoding="async" class="w-full h-full object-cover" alt="${v.name}" onerror="this.style.display='none'">
             </div>
             <div class="p-4 flex flex-col flex-1">
                 <p class="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">${v.brand}</p>
                 <h3 class="text-white font-bold text-[15px] md:text-base leading-tight mb-auto line-clamp-2">${v.name}</h3>
-                <div class="mt-4 pt-3.5 border-t border-zinc-800/60 flex justify-between items-center">
-                    <span class="text-[10px] text-zinc-600 font-semibold">Precio unitario</span>
-                    <span class="text-[#c5a059] font-black font-mono text-lg">$ ${v.price.toLocaleString()}</span>
+                <div class="mt-4 pt-3.5 border-t border-zinc-800/60 flex justify-between items-center relative">
+                    <span class="text-[10px] text-zinc-600 font-semibold absolute -top-5 left-0">Precio final</span>
+                    ${v.offerPrice 
+                        ? `<div class="flex flex-col"><span class="text-[#c5a059] font-black font-mono text-lg leading-none">$ ${v.offerPrice.toLocaleString()}</span><span class="text-zinc-600 text-[10px] line-through font-mono mt-0.5">$ ${v.price.toLocaleString()}</span></div>` 
+                        : `<span class="text-[#c5a059] font-black font-mono text-lg">$ ${v.price.toLocaleString()}</span>`
+                    }
                 </div>
             </div>
         `;
@@ -300,6 +335,7 @@ function renderBarber() {
         card.innerHTML = `
             <div class="card-img-wrap h-48 md:h-60 p-4">
                 <span class="absolute top-3 left-3 text-[9px] font-black border border-amber-900/50 text-amber-400 bg-amber-900/15 px-1.5 py-0.5 rounded-md z-10">✂ BARBERÍA</span>
+                ${getOfferBadgeTag(b)}
                 ${getStatusTag(b)}
                 <img src="${b.img}" loading="lazy" decoding="async" class="w-full h-full object-contain" alt="${b.name}" onerror="this.parentElement.querySelector('.img-ph')?.classList.remove('hidden')">
                 <div class="img-ph hidden absolute inset-0 flex items-center justify-center text-zinc-800">
@@ -309,9 +345,12 @@ function renderBarber() {
             <div class="p-4 flex flex-col flex-1">
                 <p class="text-[10px] text-zinc-600 uppercase tracking-[0.15em] font-bold mb-1">${b.brand}</p>
                 <h3 class="text-white font-bold text-[15px] md:text-base leading-tight mb-auto line-clamp-2">${b.name}</h3>
-                <div class="mt-4 pt-3.5 border-t border-zinc-800/60 flex justify-between items-center">
-                    <span class="text-[10px] text-zinc-600 font-semibold">Precio</span>
-                    <span class="text-[#c5a059] font-black font-mono text-lg">$ ${b.price.toLocaleString()}</span>
+                <div class="mt-4 pt-3.5 border-t border-zinc-800/60 flex justify-between items-center relative">
+                    <span class="text-[10px] text-zinc-600 font-semibold absolute -top-5 left-0">Precio final</span>
+                    ${b.offerPrice 
+                        ? `<div class="flex flex-col"><span class="text-[#c5a059] font-black font-mono text-lg leading-none">$ ${b.offerPrice.toLocaleString()}</span><span class="text-zinc-600 text-[10px] line-through font-mono mt-0.5">$ ${b.price.toLocaleString()}</span></div>` 
+                        : `<span class="text-[#c5a059] font-black font-mono text-lg">$ ${b.price.toLocaleString()}</span>`
+                    }
                 </div>
             </div>
         `;
@@ -424,7 +463,8 @@ function showInfo(item, type) {
 
     const mImg = document.getElementById('mImg');
     mImg.src = item.img;
-    document.getElementById('mFinal').textContent = item.price.toLocaleString();
+    const finalPrice = item.offerPrice || item.price;
+    document.getElementById('mFinal').textContent = finalPrice.toLocaleString();
 
     const waBtn = document.getElementById('btnBuyWA');
     if (waBtn) {

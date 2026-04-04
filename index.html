@@ -232,8 +232,14 @@
 
     <!-- ═══════════════════════════════════════════ PRODUCT GRID ════ -->
     <div id="galleryView" class="animate-fade-in pb-16">
+      <div id="avonModeHeader" class="hidden mb-6 flex items-center justify-center gap-4">
+        <span class="h-px bg-zinc-800 flex-1"></span>
+        <h2 class="text-zinc-400 text-xs font-bold uppercase tracking-widest text-center">Novedades y Últimas Unidades</h2>
+        <span class="h-px bg-zinc-800 flex-1"></span>
+      </div>
+
       <div id="inventoryGallery"
-        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
+        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5 transition-all duration-700">
         <!-- Products injected by public.js -->
         <div class="col-span-full flex items-center justify-center py-24 text-zinc-700">
           <div class="text-center animate-fade-in-up">
@@ -241,6 +247,13 @@
             <p class="text-sm font-semibold uppercase tracking-widest">Cargando catálogo...</p>
           </div>
         </div>
+      </div>
+
+      <div id="loadFullCatalogueBtn" class="hidden mt-12 text-center">
+        <button onclick="enableFullPublicCatalogue()" class="bg-gradient-to-r from-zinc-900 to-[#111] border border-zinc-800 hover:border-[#c5a059] text-white px-8 md:px-12 py-5 rounded-2xl text-[11px] md:text-sm font-black uppercase tracking-[0.2em] shadow-2xl transition-all hover:scale-105 active:scale-95 group">
+          Explorar Catálogo Completo
+          <span class="block text-zinc-500 text-[9px] font-medium tracking-normal normal-case mt-1 group-hover:text-[#c5a059] transition-colors">Hay decenas de fragancias más esperándote</span>
+        </button>
       </div>
     </div>
 
