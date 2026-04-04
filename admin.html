@@ -233,6 +233,9 @@
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
     </style>
+    
+    <!-- Chart.js para Estadísticas de Setmore -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -290,6 +293,12 @@
         <div class="nav-item" id="navOfertas" onclick="switchSection('ofertas')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
             Ofertas y Combos
+        </div>
+
+        <p class="text-zinc-700 text-[9px] font-bold uppercase tracking-[0.3em] px-5 mb-2 mt-6">Barbería</p>
+        <div class="nav-item text-emerald-500 hover:text-emerald-400 group" id="navSetmore" onclick="switchSection('setmore')">
+            <svg class="w-4 h-4 text-emerald-500 group-hover:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/></svg>
+            Agenda & Ingresos
         </div>
 
         <p class="text-zinc-700 text-[9px] font-bold uppercase tracking-[0.3em] px-5 mb-2 mt-6">Divisas</p>
@@ -629,6 +638,80 @@
         <div id="categoryList" class="flex flex-wrap gap-4"></div>
     </section>
 
+    <!-- ══ SECCIÓN: SETMORE AGENDA E INGRESOS ══ -->
+    <section id="sectionSetmore" class="hidden p-6 md:p-8 fade-up">
+        <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight">Agenda e Ingresos</h1>
+                    <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Modo Barbería
+                    </span>
+                </div>
+                <p class="text-zinc-500 text-sm mt-2">Sincronizado con tus reservas de <strong class="text-zinc-300">Setmore</strong>.</p>
+            </div>
+            
+            <div class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl p-1 shrink-0">
+                <button onclick="setmoreChangePeriod('day')" id="smBtnDay" class="px-4 py-2 rounded-lg text-xs font-bold text-white bg-zinc-800 transition-colors">Hoy</button>
+                <button onclick="setmoreChangePeriod('week')" id="smBtnWeek" class="px-4 py-2 rounded-lg text-xs font-bold text-zinc-500 hover:text-white transition-colors">Semana</button>
+                <button onclick="setmoreChangePeriod('month')" id="smBtnMonth" class="px-4 py-2 rounded-lg text-xs font-bold text-zinc-500 hover:text-white transition-colors">Mes</button>
+            </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-[#0c0c0c] border border-emerald-500/20 rounded-2xl p-5 relative overflow-hidden group">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
+                <p class="text-emerald-500 text-[10px] uppercase tracking-widest font-black mb-2 relative z-10">Ingresos Totales</p>
+                <h3 class="text-white text-3xl font-black font-mono relative z-10" id="smMetricTotal">$ 0</h3>
+            </div>
+            
+            <div class="bg-[#0c0c0c] border border-cyan-500/20 rounded-2xl p-5 relative overflow-hidden group">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors"></div>
+                <p class="text-cyan-500 text-[10px] uppercase tracking-widest font-black mb-2 relative z-10">Citas Completadas</p>
+                <h3 class="text-white text-3xl font-black font-mono relative z-10" id="smMetricCount">0</h3>
+            </div>
+
+            <div class="bg-[#0c0c0c] border border-purple-500/20 rounded-2xl p-5 relative overflow-hidden group">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-colors"></div>
+                <p class="text-purple-500 text-[10px] uppercase tracking-widest font-black mb-2 relative z-10">Ticket Promedio</p>
+                <h3 class="text-white text-3xl font-black font-mono relative z-10" id="smMetricAvg">$ 0</h3>
+            </div>
+
+            <div class="bg-[#0c0c0c] border border-zinc-800 rounded-2xl p-5 relative overflow-hidden group">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-zinc-500/5 rounded-full blur-2xl group-hover:bg-zinc-500/10 transition-colors"></div>
+                <p class="text-zinc-500 text-[10px] uppercase tracking-widest font-black mb-2 relative z-10">Servicio Estrella</p>
+                <h3 class="text-white text-xl font-black relative z-10 leading-tight mt-1 truncate" id="smMetricTop">---</h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Gráfico Izquierda -->
+            <div class="lg:col-span-2 bg-[#0c0c0c] border border-zinc-800 rounded-[28px] p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-6">
+                    <p class="text-zinc-300 font-bold">Flujo de Ingresos</p>
+                    <button onclick="loadSetmoreData()" class="text-zinc-500 hover:text-white transition-colors" title="Actualizar datos">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                </div>
+                <div class="w-full h-[300px] relative">
+                    <canvas id="setmoreChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Lista Derecha (Citas) -->
+            <div class="bg-[#0c0c0c] border border-zinc-800 rounded-[28px] p-6 shadow-xl flex flex-col h-full">
+                <p class="text-zinc-300 font-bold mb-6">Próximos Turnos</p>
+                <div id="smAppointmentsList" class="space-y-3 overflow-y-auto flex-1 pr-2 max-h-[300px]">
+                    <div class="flex items-center justify-center h-full">
+                        <span class="spin text-emerald-500 text-2xl">⟳</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ══ SECCIÓN: CALCULADORA COMERCIAL ══ -->
     <section id="sectionCalculadora" class="hidden p-6 md:p-8 fade-up">
         <div class="mb-8 mt-10 md:mt-0">
@@ -926,6 +1009,7 @@
 <script src="assets/js/vapes_data.js?v=2"></script>
 <script src="assets/js/barber_data.js?v=2"></script>
 <script src="assets/js/admin.js?v=4"></script>
+<script src="assets/js/setmore.js?v=1"></script>
 <script>
 // ── CATEGORIES ────────────────────────────────────────────────────────────────
 let customCategories = JSON.parse(localStorage.getItem('blessed_categories') || '[]');
