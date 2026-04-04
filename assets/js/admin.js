@@ -669,9 +669,16 @@ function openEditModal(category, id) {
     const discEl = document.getElementById('editDiscount');
     if (discEl) discEl.value = item.discount || 0;
 
+    // Show gender field only for perfumes
+    const genWrap = document.getElementById('genFieldWrap');
+    const genEl = document.getElementById('editGen');
+    if (genWrap) genWrap.classList.toggle('hidden', category !== 'perfumes');
+    if (genEl) genEl.value = item.gen || 'U';
+
     const modal = document.getElementById('editModal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    document.body.style.overflow = 'hidden'; // prevent background scroll
     if (window.innerWidth >= 768) setTimeout(() => document.getElementById('editName').focus(), 100);
 }
 
@@ -710,11 +717,21 @@ function saveEditModal() {
     const discEl = document.getElementById('editDiscount');
     if (discEl) item.discount = +discEl.value || 0;
 
+    const genEl = document.getElementById('editGen');
+    if (genEl && category === 'perfumes') item.gen = genEl.value || 'U';
+
+    // Save image: prioritize newly uploaded base64, else keep current URL/path
     const previewSrc = document.getElementById('editImgPreview').src;
-    if (previewSrc.startsWith('data:image/')) {
+    const fileInput = document.getElementById('editImgFile');
+    const hasNewUpload = fileInput.files && fileInput.files.length > 0 && previewSrc.startsWith('data:image/');
+    if (hasNewUpload) {
         item.img = previewSrc;
     } else if (id === 'new' && !item.img) {
-        item.img = 'https://via.placeholder.com/300x300/111111/c5a059?text=Nuevo';
+        item.img = '';
+    } else if (id !== 'new' && previewSrc && !previewSrc.includes('placeholder')) {
+        // Keep existing image — only update if it changed
+        if (previewSrc.startsWith('data:image/')) item.img = previewSrc;
+        // else: leave item.img as-is (already set from original)
     }
 
     markUnsaved();
@@ -731,12 +748,16 @@ function closeEditModal() {
     const modal = document.getElementById('editModal');
     modal.classList.remove('flex');
     modal.classList.add('hidden');
+    document.body.style.overflow = '';
     editingId = null;
 }
 
+// Only close when clicking the dark backdrop itself, NOT the form inside
 document.getElementById('editModal').addEventListener('click', e => {
     if (e.target === document.getElementById('editModal')) closeEditModal();
 });
+// Stop clicks inside the modal box from bubbling to the backdrop
+document.querySelector('#editModal > div')?.addEventListener('click', e => e.stopPropagation());
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditModal(); });
 
 // ─── MANEJO DE IMÁGENES (Subida y Compresión a WebP) ──────────────────────────
