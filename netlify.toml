@@ -3,6 +3,13 @@
   functions = "netlify/functions"
   edge_functions = "netlify/edge-functions"
 
+# ── Regla 0: API Routes to Serverless Functions ──
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
 # ── Regla 1: Si el usuario TIENE el rol "admin" → dejar pasar
 [[redirects]]
   from = "/admin"
