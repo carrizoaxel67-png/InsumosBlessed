@@ -8,12 +8,16 @@ export const handler = async () => {
         "Cache-Control": "no-cache"
     };
 
-    const DATABASE_URL = process.env.DATABASE_URL;
+    // Escáner dinámico: Busca automáticamente CUALQUIER variable de entorno que sea una conexión a PostgreSQL/Neon
+    const DATABASE_URL = process.env.DATABASE_URL || 
+                         process.env.NEON_DATABASE_URL || 
+                         Object.values(process.env).find(v => typeof v === 'string' && (v.startsWith('postgres://') || v.startsWith('postgresql://')));
+                         
     if (!DATABASE_URL) {
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: "DATABASE_URL no configurada", perfumes: null, vapes: null, barber: null })
+            body: JSON.stringify({ error: "Ninguna llave de conexión a NEON encontrada en Netlify Variables." })
         };
     }
 

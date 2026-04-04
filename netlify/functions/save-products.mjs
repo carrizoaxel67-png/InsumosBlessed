@@ -10,12 +10,16 @@ export const handler = async (event) => {
     if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
     if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
 
-    const DATABASE_URL = process.env.DATABASE_URL;
+    // Escáner dinámico: Busca automáticamente la conexión a PostgreSQL/Neon sin importar el nombre de la variable
+    const DATABASE_URL = process.env.DATABASE_URL || 
+                         process.env.NEON_DATABASE_URL || 
+                         Object.values(process.env).find(v => typeof v === 'string' && (v.startsWith('postgres://') || v.startsWith('postgresql://')));
+                         
     if (!DATABASE_URL) {
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: "DATABASE_URL no configurada en Netlify" })
+            body: JSON.stringify({ error: "Ninguna llave de conexión a NEON encontrada en Netlify Variables." })
         };
     }
 
