@@ -298,8 +298,6 @@ function renderPerfumes() {
         tableBody.appendChild(buildPerfumeRow(p));
         if (gallery) gallery.appendChild(buildGalleryCard(p, 'perfumes'));
     });
-
-    document.getElementById('totalItems').textContent = filtered.length;
 }
 
 function buildPerfumeRow(p) {
@@ -366,8 +364,6 @@ function renderVapes() {
         tableBody.appendChild(buildVapeRow(v));
         if (gallery) gallery.appendChild(buildGalleryCard(v, 'vapes'));
     });
-
-    document.getElementById('totalItems').textContent = workingVapes.length;
 }
 
 function buildVapeRow(v) {
@@ -428,8 +424,6 @@ function renderBarber() {
         tableBody.appendChild(buildBarberRow(b));
         if (gallery) gallery.appendChild(buildGalleryCard(b, 'barber'));
     });
-
-    document.getElementById('totalItems').textContent = workingBarber.length;
 }
 
 function buildBarberRow(b) {
