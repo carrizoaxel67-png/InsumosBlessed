@@ -2,6 +2,7 @@
   "name": "blessed-barbershop",
   "version": "1.0.0",
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@netlify/blobs": "^8.0.0",
     "chart.js": "^4.5.1"
   }
