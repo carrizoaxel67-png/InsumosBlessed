@@ -86,25 +86,26 @@ async function loadProductsFromCloud() {
 
         if (res.ok) {
             const data = await res.json();
-            // Sólo sobreescribir si la nube tiene datos reales guardados
-            if (data && Array.isArray(data.perfumes) && data.perfumes.length > 0) {
-                workingPerfumes = data.perfumes;
-                workingVapes = Array.isArray(data.vapes) && data.vapes.length > 0
-                    ? data.vapes
-                    : workingVapes;
-                workingBarber = Array.isArray(data.barber) && data.barber.length > 0
-                    ? data.barber
-                    : workingBarber;
+            // Importante: No usar "length > 0" porque si el usuario borró todo, el array viene vacío
+            // y queremos que SOBREESCRIBA el fallback local. Si la propiedad existe en data, se usa.
+            if (data && typeof data === 'object') {
+                if (Array.isArray(data.perfumes)) workingPerfumes = data.perfumes;
+                if (Array.isArray(data.vapes)) workingVapes = data.vapes;
+                if (Array.isArray(data.barber)) workingBarber = data.barber;
+                
                 if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
                     customStatuses = data.customStatuses;
-                    localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
+                } else if (!data.customStatuses || customStatuses.length === 0) {
+                    // Seed initial dynamic tags if none exist
+                    customStatuses = [
+                        { id: 'house', label: 'De la Casa', color: '#6b21a8', textColor: '#d8b4fe' }, // purple
+                        { id: 'preorder', label: 'Encargue', color: '#164e63', textColor: '#67e8f9' } // cyan
+                    ];
                 }
-                if (Array.isArray(data.offers)) {
-                    workingOffers = data.offers;
-                }
-                if (Array.isArray(data.packs)) {
-                    workingPacks = data.packs;
-                }
+                localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
+
+                if (Array.isArray(data.offers)) workingOffers = data.offers;
+                if (Array.isArray(data.packs)) workingPacks = data.packs;
             }
         }
     } catch (e) {
@@ -639,20 +640,12 @@ function openEditModal(category, id) {
     // Populate Status Select dynamically
     const statusSelect = document.getElementById('editStatus');
     if (statusSelect) {
-        const defaultOptions = [
-            { id: 'available', label: 'DISPONIBLE' },
-            { id: 'house', label: 'PRODUCTO DE LA CASA' },
-            { id: 'low_stock', label: 'POCAS UNIDADES' },
-            { id: 'out_of_stock', label: 'SIN STOCK' },
-            { id: 'preorder', label: 'DISPONIBLE POR ENCARGUE' },
-            { id: 'unavailable', label: 'NO DISPONIBLE' }
-        ];
+        let selectHtml = `<option value="available">Automático (Según Stock)</option>`;
+        selectHtml += `<option value="unavailable">Oculto / Agotado / No Disponible</option>`;
+        selectHtml += customStatuses.map(st => `<option value="${st.id}">${st.label}</option>`).join('');
         
-        let selectHtml = defaultOptions.map(opt => `<option value="${opt.id}">${opt.label}</option>`).join('');
-        selectHtml += customStatuses.map(st => `<option value="${st.id}">${st.label} (Custom)</option>`).join('');
-        
-        // Add legacy if not found in both
-        if (item.status && !customStatuses.find(st => st.id === item.status) && !defaultOptions.find(opt => opt.id === item.status)) {
+        // Mantener compatibilidad con etiquetas viejas que no existan más
+        if (item.status && item.status !== 'available' && item.status !== 'unavailable' && !customStatuses.find(st => st.id === item.status)) {
             selectHtml += `<option value="${item.status}">${item.status}</option>`;
         }
         
