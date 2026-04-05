@@ -76,42 +76,72 @@ function loadLocalData() {
 async function loadProductsFromCloud() {
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         const res = await fetch('/api/get-products', {
             cache: 'no-store',
-            headers: { 'Pragma': 'no-cache' },
+            headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
             signal: controller.signal
         });
         clearTimeout(timeoutId);
 
-        if (res.ok) {
-            const data = await res.json();
-            // Importante: No usar "length > 0" porque si el usuario borró todo, el array viene vacío
-            // y queremos que SOBREESCRIBA el fallback local. Si la propiedad existe en data, se usa.
-            if (data && typeof data === 'object') {
-                if (Array.isArray(data.perfumes)) workingPerfumes = data.perfumes;
-                if (Array.isArray(data.vapes)) workingVapes = data.vapes;
-                if (Array.isArray(data.barber)) workingBarber = data.barber;
-                
-                if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
-                    customStatuses = data.customStatuses;
-                } else if (!data.customStatuses || customStatuses.length === 0) {
-                    // Seed initial dynamic tags if none exist
-                    customStatuses = [
-                        { id: 'house', label: 'De la Casa', color: '#6b21a8', textColor: '#d8b4fe' }, // purple
-                        { id: 'preorder', label: 'Encargue', color: '#164e63', textColor: '#67e8f9' } // cyan
-                    ];
-                }
-                localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
-
-                if (Array.isArray(data.offers)) workingOffers = data.offers;
-                if (Array.isArray(data.packs)) workingPacks = data.packs;
-            }
+        if (!res.ok) {
+            console.warn('Cloud fetch failed, using local data. Status:', res.status);
+            return;
         }
+
+        const data = await res.json();
+
+        // Si NEON no fue inicializado intencionalmente (_seeded: true),
+        // usamos los datos locales del JS y los guardamos en NEON (auto-seed).
+        if (!data || !data._seeded) {
+            console.info('NEON no inicializado. Realizando auto-seed con datos locales...');
+            await seedCloudFromLocal();
+            return;
+        }
+
+        // NEON tiene datos reales — sobreescribir estado local con los de la nube
+        if (Array.isArray(data.perfumes)) workingPerfumes = data.perfumes;
+        if (Array.isArray(data.vapes))    workingVapes    = data.vapes;
+        if (Array.isArray(data.barber))   workingBarber   = data.barber;
+        if (Array.isArray(data.offers))   workingOffers   = data.offers;
+        if (Array.isArray(data.packs))    workingPacks    = data.packs;
+
+        if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
+            customStatuses = data.customStatuses;
+            localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
+        }
+
     } catch (e) {
-        console.warn('Usando datos locales por falla o timeout en la nube.', e);
+        console.warn('Timeout o error de red — usando datos locales.', e.message);
     }
 }
+
+// Auto-siembra NEON con el inventario local cuando nunca fue inicializado
+async function seedCloudFromLocal() {
+    try {
+        const res = await fetch('/api/save-products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                perfumes: workingPerfumes,
+                vapes: workingVapes,
+                barber: workingBarber,
+                customStatuses: customStatuses,
+                offers: workingOffers,
+                packs: workingPacks
+            })
+        });
+        if (res.ok) {
+            console.info('✓ NEON sembrado con inventario local correctamente.');
+        } else {
+            console.warn('Auto-seed falló:', res.status, await res.text());
+        }
+    } catch(e) {
+        console.warn('Auto-seed error de red:', e.message);
+    }
+}
+
+
 
 function defaultBarber() {
     return (typeof barberItems !== 'undefined' ? barberItems : []).map(b => ({
@@ -168,7 +198,7 @@ function markUnsaved() {
 
 // ── SIDEBAR / SECTIONS ──────────────────────────────────────────────────────
 function switchSection(name) {
-    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas','Estados','Ofertas'];
+    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas','Estados','Ofertas','Setmore'];
     sections.forEach(s => {
         const el = document.getElementById('section' + s);
         if (el) el.classList.toggle('hidden', s.toLowerCase() !== name);
@@ -176,7 +206,7 @@ function switchSection(name) {
     const navMap = {
         catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora',
         reviews:'navReviews', divisas:'navDivisas', reservas:'navReservas',
-        estados:'navEstados', ofertas:'navOfertas'
+        estados:'navEstados', ofertas:'navOfertas', setmore:'navSetmore'
     };
     Object.entries(navMap).forEach(([k,id]) => {
         const el = document.getElementById(id);
@@ -186,11 +216,18 @@ function switchSection(name) {
     if (name === 'estados') renderStatusList();
     if (name === 'ofertas') { populateOfferProductSelect(); renderOffers(); populatePacksProductSelect(); renderPacks(); }
     if (name === 'calculadora' || name === 'divisas') { calculateMargin(); convertCurrency(); }
+    if (name === 'setmore') {
+        // Pequeño delay para asegurar que el canvas esté en el DOM
+        setTimeout(() => {
+            if (typeof initSetmoreModule === 'function') initSetmoreModule();
+        }, 100);
+    }
     if (window.innerWidth < 769) {
         document.getElementById('sidebar')?.classList.remove('open');
         document.getElementById('sidebarOverlay')?.classList.add('hidden');
     }
 }
+
 
 function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');

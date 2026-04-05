@@ -25,8 +25,9 @@ export const handler = async (event) => {
 
     try {
         const data = JSON.parse(event.body || "{}");
-        if (!data.perfumes || !data.vapes) {
-            return { statusCode: 400, headers, body: JSON.stringify({ error: "Datos inválidos: faltan perfumes o vapes" }) };
+        // Acepta arrays vacíos (usuario borró todo intencionalmente)
+        if (!Array.isArray(data.perfumes) || !Array.isArray(data.vapes)) {
+            return { statusCode: 400, headers, body: JSON.stringify({ error: "Datos inválidos: perfumes y vapes deben ser arrays" }) };
         }
 
         const sql = neon(DATABASE_URL);
@@ -41,10 +42,13 @@ export const handler = async (event) => {
         `;
 
         const payload = {
+            _seeded: true,  // Flag: NEON fue inicializado intencionalmente por el admin
             perfumes: data.perfumes,
             vapes: data.vapes,
             barber: data.barber || [],
-            customStatuses: data.customStatuses || []
+            customStatuses: data.customStatuses || [],
+            offers: data.offers || [],
+            packs: data.packs || []
         };
 
         // Upsert con conflicto en id
