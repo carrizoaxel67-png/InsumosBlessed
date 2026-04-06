@@ -20,40 +20,56 @@ const perfumeFilters = document.getElementById('perfumeFilters');
 
 // ─── INICIALIZACIÓN ───────────────────────────────────────────────────────────
 async function initPublic() {
-    // Fase 1: carga local instantánea, sin esperar red
-    loadLocalFallback();
     setupPublicListeners();
-    render();
+    
+    // Attempt to load from NEON (Source of truth)
+    const cloudOK = await loadFromCloud();
 
-    // Fase 2: intentar actualizar desde la nube en segundo plano
+    if (!cloudOK) {
+        console.warn('[public] Error/Timeout conectando a NEON. Usando inventario local de emergencia.');
+        loadLocalFallback();
+    }
+    
+    render();
+}
+
+async function loadFromCloud() {
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 7000);
         const res = await fetch('/api/get-products', {
             cache: 'no-store',
-            headers: { 'Pragma': 'no-cache' },
+            headers: { 'Cache-Control': 'no-cache' },
             signal: controller.signal
         });
         clearTimeout(timeoutId);
 
-        if (res.ok) {
-            const data = await res.json();
-            // Sólo sobreescribir si la nube tiene datos reales
-            if (data && Array.isArray(data.perfumes) && data.perfumes.length > 0) {
+        if (!res.ok) return false;
+        
+        const data = await res.json();
+        
+        if (data && data._seeded) {
+            if (Array.isArray(data.perfumes)) {
                 publicPerfumes = data.perfumes.filter(p => p.visible !== false);
-                publicVapes    = Array.isArray(data.vapes) ? data.vapes.filter(v => v.visible !== false) : publicVapes;
-                publicBarber   = Array.isArray(data.barber) ? data.barber.filter(b => b.visible !== false) : publicBarber;
-                if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
-                    customStatuses = data.customStatuses;
-                }
-                if (Array.isArray(data.packs)) {
-                    publicPacks = data.packs.filter(p => p.visible !== false);
-                }
-                render(); // re-render silencioso con datos de la nube
             }
+            if (Array.isArray(data.vapes)) {
+                publicVapes = data.vapes.filter(v => v.visible !== false);
+            }
+            if (Array.isArray(data.barber)) {
+                publicBarber = data.barber.filter(b => b.visible !== false);
+            }
+            if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
+                customStatuses = data.customStatuses;
+            }
+            if (Array.isArray(data.packs)) {
+                publicPacks = data.packs.filter(p => p.visible !== false);
+            }
+            console.log(`[public] ✓ NEON cargado: ${publicPerfumes.length} perfumes`);
+            return true;
         }
+        return false;
     } catch (e) {
-        console.warn('No se pudo actualizar desde la nube, usando datos locales.', e);
+        return false;
     }
 }
 
