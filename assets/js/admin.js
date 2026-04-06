@@ -246,9 +246,10 @@ function initViews() {
     const isMobile = window.innerWidth < 768;
     const tableView = document.getElementById('tableView');
     const galleryView = document.getElementById('galleryView');
+    
     if (!isMobile) {
-        tableView.style.display = 'block';
-        galleryView.style.display = 'none';
+        if (tableView) tableView.style.display = 'block';
+        if (galleryView) galleryView.style.display = 'none';
     }
 }
 
@@ -262,17 +263,21 @@ function updateViewUI() {
     if (currentView === 'table') {
         btnTable.classList.add('bg-zinc-800', 'text-white', 'shadow-sm');
         btnTable.classList.remove('text-zinc-500', 'hover:text-white');
-        btnGallery.classList.remove('bg-zinc-800', 'text-white', 'shadow-sm');
-        btnGallery.classList.add('text-zinc-500', 'hover:text-white');
-        tableView.style.display = 'block';
-        galleryView.style.display = 'none';
+        if (btnGallery) {
+            btnGallery.classList.remove('bg-zinc-800', 'text-white', 'shadow-sm');
+            btnGallery.classList.add('text-zinc-500', 'hover:text-white');
+        }
+        if (tableView) tableView.style.display = 'block';
+        if (galleryView) galleryView.style.display = 'none';
     } else {
-        btnGallery.classList.add('bg-zinc-800', 'text-white', 'shadow-sm');
-        btnGallery.classList.remove('text-zinc-500', 'hover:text-white');
+        if (btnGallery) {
+            btnGallery.classList.add('bg-zinc-800', 'text-white', 'shadow-sm');
+            btnGallery.classList.remove('text-zinc-500', 'hover:text-white');
+        }
         btnTable.classList.remove('bg-zinc-800', 'text-white', 'shadow-sm');
         btnTable.classList.add('text-zinc-500', 'hover:text-white');
-        tableView.style.display = 'none';
-        galleryView.style.display = 'block';
+        if (tableView) tableView.style.display = 'none';
+        if (galleryView) galleryView.style.display = 'block';
     }
 }
 
