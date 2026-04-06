@@ -321,7 +321,7 @@ function renderPerfumes() {
         inventoryGallery.appendChild(card);
     });
 
-    updateCounters(itemsToShow.length, 'Fragancias');
+    updateCounters(filtered.length, 'Fragancias');
 }
 
 
