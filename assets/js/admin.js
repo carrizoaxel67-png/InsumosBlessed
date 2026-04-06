@@ -180,7 +180,7 @@ function markUnsaved() {
 
 // ── SIDEBAR / SECTIONS ──────────────────────────────────────────────────────
 function switchSection(name) {
-    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas','Estados','Ofertas','Setmore'];
+    const sections = ['Catalogo','Categorias','Calculadora','Reviews','Divisas','Reservas','Estados','Ofertas'];
     sections.forEach(s => {
         const el = document.getElementById('section' + s);
         if (el) el.classList.toggle('hidden', s.toLowerCase() !== name);
@@ -188,7 +188,7 @@ function switchSection(name) {
     const navMap = {
         catalogo:'navCatalogo', categorias:'navCategorias', calculadora:'navCalculadora',
         reviews:'navReviews', divisas:'navDivisas', reservas:'navReservas',
-        estados:'navEstados', ofertas:'navOfertas', setmore:'navSetmore'
+        estados:'navEstados', ofertas:'navOfertas'
     };
     Object.entries(navMap).forEach(([k,id]) => {
         const el = document.getElementById(id);
@@ -198,12 +198,7 @@ function switchSection(name) {
     if (name === 'estados') renderStatusList();
     if (name === 'ofertas') { populateOfferProductSelect(); renderOffers(); populatePacksProductSelect(); renderPacks(); }
     if (name === 'calculadora' || name === 'divisas') { calculateMargin(); convertCurrency(); }
-    if (name === 'setmore') {
-        // Pequeño delay para asegurar que el canvas esté en el DOM
-        setTimeout(() => {
-            if (typeof initSetmoreModule === 'function') initSetmoreModule();
-        }, 100);
-    }
+
     if (window.innerWidth < 769) {
         document.getElementById('sidebar')?.classList.remove('open');
         document.getElementById('sidebarOverlay')?.classList.add('hidden');
