@@ -79,68 +79,42 @@ async function loadProductsFromCloud() {
         const timeoutId = setTimeout(() => controller.abort(), 8000);
         const res = await fetch('/api/get-products', {
             cache: 'no-store',
-            headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
+            headers: { 'Cache-Control': 'no-cache' },
             signal: controller.signal
         });
         clearTimeout(timeoutId);
 
         if (!res.ok) {
-            console.warn('Cloud fetch failed, using local data. Status:', res.status);
+            console.warn('[cloud] fetch falló, usando datos locales. Status:', res.status);
             return;
         }
 
         const data = await res.json();
 
-        // Si NEON no fue inicializado intencionalmente (_seeded: true),
-        // usamos los datos locales del JS y los guardamos en NEON (auto-seed).
+        // Solo confiar en NEON si fue seeded intencionalmente
         if (!data || !data._seeded) {
-            console.info('NEON no inicializado. Realizando auto-seed con datos locales...');
-            await seedCloudFromLocal();
+            console.info('[cloud] NEON sin datos reales. Usando inventario local.');
             return;
         }
 
-        // NEON tiene datos reales — sobreescribir estado local con los de la nube
-        if (Array.isArray(data.perfumes)) workingPerfumes = data.perfumes;
-        if (Array.isArray(data.vapes))    workingVapes    = data.vapes;
-        if (Array.isArray(data.barber))   workingBarber   = data.barber;
-        if (Array.isArray(data.offers))   workingOffers   = data.offers;
-        if (Array.isArray(data.packs))    workingPacks    = data.packs;
+        // NEON es la fuente de verdad — sobreescribir TODO
+        workingPerfumes = Array.isArray(data.perfumes) ? data.perfumes : workingPerfumes;
+        workingVapes    = Array.isArray(data.vapes)    ? data.vapes    : workingVapes;
+        workingBarber   = Array.isArray(data.barber)   ? data.barber   : workingBarber;
+        workingOffers   = Array.isArray(data.offers)   ? data.offers   : workingOffers;
+        workingPacks    = Array.isArray(data.packs)    ? data.packs    : workingPacks;
 
         if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
             customStatuses = data.customStatuses;
             localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
         }
 
+        console.info('[cloud] Cargado:', workingPerfumes.length, 'perfumes,', workingVapes.length, 'vapes,', workingBarber.length, 'barber');
+
     } catch (e) {
-        console.warn('Timeout o error de red — usando datos locales.', e.message);
+        console.warn('[cloud] Error/timeout — usando datos locales:', e.message);
     }
 }
-
-// Auto-siembra NEON con el inventario local cuando nunca fue inicializado
-async function seedCloudFromLocal() {
-    try {
-        const res = await fetch('/api/save-products', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                perfumes: workingPerfumes,
-                vapes: workingVapes,
-                barber: workingBarber,
-                customStatuses: customStatuses,
-                offers: workingOffers,
-                packs: workingPacks
-            })
-        });
-        if (res.ok) {
-            console.info('✓ NEON sembrado con inventario local correctamente.');
-        } else {
-            console.warn('Auto-seed falló:', res.status, await res.text());
-        }
-    } catch(e) {
-        console.warn('Auto-seed error de red:', e.message);
-    }
-}
-
 
 
 function defaultBarber() {
