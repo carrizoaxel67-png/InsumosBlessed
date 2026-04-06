@@ -1005,9 +1005,8 @@ function renderStatusList() {
         div.innerHTML = `
             <div class="flex items-center gap-3">
                 <div class="w-4 h-4 rounded-full" style="background-color: ${st.color}"></div>
-                <div>
                     <p class="text-sm font-bold text-white">${st.label}</p>
-                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest">ID: ${st.id}</p>
+                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest">PRIORIDAD: ${st.priority !== undefined ? st.priority : 2} | ID: ${st.id}</p>
                 </div>
             </div>
             <button onclick="removeStatus('${st.id}')" class="opacity-0 group-hover:opacity-100 p-2 text-zinc-600 hover:text-red-500 transition-all">
@@ -1022,6 +1021,8 @@ function addNewStatus() {
     const label = document.getElementById('newStateLabel').value.trim();
     const color = document.getElementById('newStateColor').value;
     const textColor = document.getElementById('newStateTextColor').value;
+    const priorityStr = document.getElementById('newStatePriority')?.value;
+    const priority = priorityStr ? parseInt(priorityStr, 10) : 1;
 
     if (!label) { showToast('Escribe un nombre para el estado', 'error'); return; }
 
@@ -1029,7 +1030,8 @@ function addNewStatus() {
         id: 'st_' + Date.now(),
         label,
         color,
-        textColor
+        textColor,
+        priority
     };
 
     customStatuses.push(newSt);

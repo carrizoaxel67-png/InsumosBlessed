@@ -60,6 +60,9 @@ async function loadFromCloud() {
             }
             if (Array.isArray(data.customStatuses) && data.customStatuses.length > 0) {
                 customStatuses = data.customStatuses;
+                customStatuses.forEach(st => {
+                    statusPriority[st.id] = st.priority !== undefined ? st.priority : 2;
+                });
             }
             if (Array.isArray(data.packs)) {
                 publicPacks = data.packs.filter(p => p.visible !== false);
