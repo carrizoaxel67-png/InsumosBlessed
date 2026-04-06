@@ -25,15 +25,21 @@ let editingId = null;
 // ─── INICIALIZACIÓN ─────────────────────────────────────────────────────────
 async function init() {
     fetchWeatherAndCurrency();
-    // Fase 1 (sincrónica): llenar arrays desde datos locales — render immediate
-    loadLocalData();
     setupListeners();
     initViews();
-    render(); // Muestra contenido local
-    // Fase 2 (asíncrona): actualizar desde la nube silenciosamente
-    await loadProductsFromCloud();
+
+    // NEON es la fuente de verdad — cargar primero desde la nube
+    const cloudOK = await loadProductsFromCloud();
+
+    // Solo usar archivos JS locales si NEON falló (sin internet, error, etc.)
+    if (!cloudOK) {
+        console.warn('[init] Cloud falló — usando datos locales de emergencia');
+        loadLocalData();
+    }
+
     render();
 }
+
 
 async function fetchWeatherAndCurrency() {
     const controller = new AbortController();
@@ -85,16 +91,15 @@ async function loadProductsFromCloud() {
         clearTimeout(timeoutId);
 
         if (!res.ok) {
-            console.warn('[cloud] fetch falló, usando datos locales. Status:', res.status);
-            return;
+            console.warn('[cloud] fetch falló, status:', res.status);
+            return false;
         }
 
         const data = await res.json();
 
-        // Solo confiar en NEON si fue seeded intencionalmente
         if (!data || !data._seeded) {
-            console.info('[cloud] NEON sin datos reales. Usando inventario local.');
-            return;
+            console.info('[cloud] NEON sin datos reales todavía.');
+            return false;
         }
 
         // NEON es la fuente de verdad — sobreescribir TODO
@@ -109,12 +114,15 @@ async function loadProductsFromCloud() {
             localStorage.setItem('blessed_statuses', JSON.stringify(customStatuses));
         }
 
-        console.info('[cloud] Cargado:', workingPerfumes.length, 'perfumes,', workingVapes.length, 'vapes,', workingBarber.length, 'barber');
+        console.info('[cloud] ✓ Cargado:', workingPerfumes.length, 'perfumes,', workingVapes.length, 'vapes');
+        return true;
 
     } catch (e) {
-        console.warn('[cloud] Error/timeout — usando datos locales:', e.message);
+        console.warn('[cloud] Error/timeout:', e.message);
+        return false;
     }
 }
+
 
 
 function defaultBarber() {
